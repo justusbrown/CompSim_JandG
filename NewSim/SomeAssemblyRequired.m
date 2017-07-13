@@ -1,6 +1,6 @@
 mrstModule add ad-fi 
 mrstModule add ad-core
-
+%%GITHUB TEST
 
 G = cartGrid([2, 2, 2]);
 G = computeGeometry(G);
