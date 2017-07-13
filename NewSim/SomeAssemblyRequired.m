@@ -1,4 +1,3 @@
-%did this work?
 mrstModule add ad-fi 
 mrstModule add ad-core
 
