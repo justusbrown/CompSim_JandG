@@ -1,6 +1,5 @@
 mrstModule add ad-fi 
 mrstModule add ad-core
-%%GITHUB TEST
 
 G = cartGrid([2, 2, 2]);
 G = computeGeometry(G);
@@ -26,7 +25,7 @@ outflux_p=8e6;
 influx_rate = 1000/day  % in m^3/s
 
 
-Temp = 30 + 273.15;  % Temperature (in Kelvin)
+Temp = 30 + 273.15;  % Temperaclearture (in Kelvin)
 thermo=addThermo();
 thermo.EOS=@PREOS;
 
@@ -71,6 +70,9 @@ bc.dirichlet.Eo=sum(bc.dirichlet.Xio)/rock.pv(1);
 bc.dirichlet.Eg=sum(bc.dirichlet.Xig)/rock.pv(1); %HERE I AM TREATING MOLES AND MOLE FRACTIONS AS EQUIVALENT BUT I KNOW THATS NOT OKAY
 bc.dirichlet.F=bc.dirichlet.Eo*bc.dirichlet.So+bc.dirichlet.Eg*vapor_frac; %STILL NEED TO CLARIFY So, Sg,Sw, vs L and V
 bc.dirichlet.Sw=vapor_y(4)/sum(vapor_y)+liquid_x(4)/sum(liquid_x); %CHECK WITH XIAOMENG ON DEFINING Sw
+bc.dirichlet.cwL=liquid_x(4);
+bc.dirichlet.cwV=vapor_y(4).*ones(numCells,1);
+bc.dirichlet.Cw=vapor_y(4)*vapor_frac+liquid_x(4)*(1-vapor_frac) %IM NOT SURE THIS IS ASSEMBLED CORRECTLY, BUT IM TRYING NOT TO FIXATE ON INDIVIDUAL LINES
 
 %bc.dirichlet for outflux IS NOW DEFINED FOR Zi, F, Sw, and P ... (OUR PRIMARY VARIABLES)
 %NOW DEFINE DIRICHLET CONDITIONS FOR INFLUX
@@ -104,6 +106,18 @@ state.Ew=(liquid_x(4)+vapor_y(4)).*ones(numCells,1)./rock.pv;
 state.F=state.Eg.*vapor_frac+state.Eo.*state.So;
 state.Sw=vapor_y(4)/sum(vapor_y)+liquid_x(4)/sum(liquid_x);
 state.pressure=outflux_p*ones(numCells,1);
+state.cwL=liquid_x(4).*ones(numCells,1);
+state.cwV=vapor_y(4).*ones(numCells,1);
+state.Cw=(vapor_y(4)*vapor_frac+liquid_x(4)*(1-vapor_frac)).*ones(numCells,1); %IM NOT SURE THIS IS ASSEMBLED CORRECTLY, BUT IM TRYING NOT TO FIXATE ON INDIVIDUAL LINES
+state.Sg=vapor_frac;%NEED TO KNOW IF VAPOR_FRAC INCLUDES WATER. I THINK IT DOES AND SO SOME THINGS NEED FIXING
+
+state.fluid=initialFluid
+%CONSTANT VISCOSITIES & COMPRESSIBILITY (which I don't know if I need atm)
+state.fluid.muL=1e-3;
+state.fluid.muG=1e-5;
+state.fluid.cl    = 4.4e-5/atm  % Compressibility
+state.fluid.p_ref = 1*atm       % Reference pressure
+
 
 state0=state;
 
@@ -115,16 +129,19 @@ total_time = 100000*day;   % Total time
 steps      = dt*ones(floor(total_time/dt), 1); 
 t          = cumsum(steps); 
 
-
+nComp_C=3; %# OF NON WATER COMPONENTS
 %% 
-% HERE ARE THE TIME STEPS STARTIN FOR THE ITERATIONS
+% HERE ARE THE TIME STEPS STARTINg FOR THE ITERATIONS
 
 for tstep = 1 : numel(steps)
 
    dt = steps(tstep); 
    
+%%HERE STARTS EQUATION ASSEMBLING - THIS IS THE BEGINNING OF SETTING UP THE
+%%EQUATIONS
    %THE MAIN VARIABLESARE P,F, Zi, Sw So MAKE ADI VARIABLES
    
+   fluid=state.fluid
    p=state.pressure;
    F=state.F;
    Zi=state.Zi;
@@ -133,9 +150,14 @@ for tstep = 1 : numel(steps)
    Xio=state.Xio;
    Ew=state.Ew;
    So=state.So;
-
-   [p,F,Zi,Sw]=initVariablesADI(p,F,Zi,Sw);
    
+   cwL=state.cwL
+   cwV=state.cwV
+   Cw=state.Cw
+   
+   [p,F,Zi,Sw]=initVariablesADI(p,F,Zi,Sw); %DOES THIS MAKE Xi* ADI ALSO? I BELIEVE IT DOES
+   
+   fluid0=state0.fluid %THIS ACCOUNTS FOR TEMPERATURE AND PRESSURE, SO I MAY BE BEING SLOPPY?REPETITIVE HERE
    p0=state0.pressure;
    F0=state0.F;
    Zi0=state0.Zi
@@ -144,10 +166,78 @@ for tstep = 1 : numel(steps)
    Xio0=state0.Xio;
    Ew0=state0.Ew;
    So0=state0.So;
+   cwL0=state0.cwL
+   cwV0=state0.cwV
+   Cw0=state0.Cw %I DONT KNOW IF ALL OF THIS IS NECESSARY
    
 [krL,krG]=quadraticRelPerm(So);
 bd=bc.dirichlet;
 [bc_krL, bc_krG] = quadraticRelperm(bd.So);
+
+g  = norm(gravity);
+dz=s.dz; %STILL NEED TO DO THIS IN SETUPSYSTEM
+
+%COMPUTE THE MOBILITIES
+mobL=krL./fluid.muL;
+mobG=krG./fluid.muG;
+bc_mobL   = bc_krL./fluid.muL;
+bc_mobG   = bc_krG./fluid.muG;
+
+%COMPUTE UPSTREAM DIRECTION FOR EACH COMPONENT (only including non-water
+%components because bravo-dome does, so might need change). Also, I am only
+%establishing everything as cell arrays becuase bravo dome does and i think
+%they might need to be that way for solvefi.. might change also
+dpC = cell(nComp_C, 1);
+upC = cell(nComp_C, 1);
+for ic = 1:nComp_C
+    dpC{ic} = s.p_grad(p) - g*(fluid.components.MW(ic).*dz); %STILL NEED TO SET GRAD STUFF UP IN SETUPSYSTEM AREA
+    upC{ic} = (double(dpC{ic})>=0);
+end
+    dpW = s.p_grad(p) - g*(fluid.components.MW(4).*dz); %COMPONENT 4 IS WATER< I PLAN ON MAKING A FUNCTION THAT REGISTERS WHICH COMPONENTS ARE WHICH SO WE CAN TYPE THEM IN BY NAME INSTEAD
+    upW  = (double(dpW)>=0);
+
+%[success_flag,stability_flag,vapor_y,liquid_x,vapor_frac,cubic_time]=GI_flash(fluid,thermo,options); %I AM CONCERNED THAT THESE MIGHT NOT COME OUT AS ADI VARIABLES
+%I ALREADY KNOW THESE FOR THE INTITIAL FLUID SO I DONT REALLY WANT THIS, BUT IF IT STAYS< I NEED TO TRANSLATE THE TERMS
+
+fluxC=cell(nComp,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
+
+    for ic = 1 : nComp
+       %%
+       % The function |s.faceConcentrations| computes concentration on the faces given
+       % cell concentrations, using upwind directions.
+       %RESIDUAL FOR NON WATER COMPONENTS
+       bc_val = bd.Xig{ic}.*bc_mobG + bd.Xio{ic}.*bc_mobL; 
+       fluxC{ic} = s.faceConcentrations(upC{ic}, Xig{ic}.*mobG + Xio{ic}.*mobL, bc_val); %NEED TO ADD SETUP FACE CONCENTRAIONS IN SETUP SYSTEM AREA
+       eqs{ic} = (rock.pv/dt).*(F*Zi(ic)-F0*Zi(ic))+ s.div(fluxC{ic}.*T.*dpC{ic});
+    end
+
+    % Compute the residual of the mass conservation equation for water.
+    bc_val = bd.cwV.*bc_mobG + bd.cwL.*bc_mobL;
+    fluxW = s.faceConcentrations(upW, cwV.*mobG + cwG.*mobL, bc_val);%NEED TO ADD IN SETUPCONTROLS
+    eqs{nComp + 1} = (rock.pv/dt).*(Ew*Sw - Ew0*Sw0) + s.div(fluxW.*T.*dpW);
+    %DONE COMPUTING RESIDUAL FOR WATER
+    
+    %COMPUTE THE GLOBAL FLOW RESIDUAL
+    eqs{nComp+2}=(rock.pv/dt).*(F-F0)+s.div(fluxC{ic}.*T.*dpC{ic}); %THE SECOND TERM IS SAME AS FOR INDIVIDUAL COMPONENTS. THIS MUST CHANGE
+    %DONE COMPUTING GLOBAL FLOW EQ
+    
+    %COMPUTE THE SATURATION RESIDUAL EQUATION
+    eqs{nComp+3}=(F-F0)*((So-So0)/(Eo-Eo0)+(Sg-Sg0)/(Eg-Eg0))+Sw-1;
+    %DONE COMPUTING THE RESIDUAL FOR SATURATION
+    
+    %ADD INPUT FLUX
+    for ic = 1 : nComp
+       eqs{ic}(bc.influx_cells) = eqs{ic}(bc.influx_cells) - bc.C_influx{ic};
+    end
+    eqs{nComp + 1}(bc.influx_cells) = eqs{nComp + 1}(bc.influx_cells) - bc.water_influx;
+    %DONE ADDING INPUT FLUXES
+     %THIS IS THE END OF SETTING UP THE EQUATIONS!!!!!!!!!!!!!
+   %%NOW CONTINUING WITH SOLVE FI %%I MIGHT WANT TO MAKE THIS EQUATION
+   %%ASSEMLE PART SEPERATE. IM GOING TO BED, ILL ASK XIAOMENG TOMORROW
+   %%AFTER MEETING WITH THE EXTERNSHIP GROUP
+   
+   
+
 
 
 
