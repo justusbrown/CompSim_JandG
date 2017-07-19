@@ -9,7 +9,7 @@ state.Xig=Xiv(1:3); %4 components. units=MOLig/MOLg
 state.Xio=Xil(1:3); %units=MOLio/MOLo
 state.Xwv=Xiv(4); %units=MOLwv/MOLw
 state.Xwl=Xil(4);
-state.V=V
+state.vapor_frac=vapor_frac
 
 
 
