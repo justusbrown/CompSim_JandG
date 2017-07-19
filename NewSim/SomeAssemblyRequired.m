@@ -51,6 +51,7 @@ plotCellData(G,G.cells.indexMap), view(30,50), xlabel('x'), ylabel('y'),zlabel('
 
 %%
 %THIS IS WHERE setupControls WAS gr-07/19
+bc=setupControls_JandG(rock,outflucFluid,thermo,options);
 
 %%
 %NOW INITIALIZING THE STATE
