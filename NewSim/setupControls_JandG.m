@@ -2,6 +2,8 @@
 
 function [bc]=setupControls_JandG(rock,outfluxFluid,thermo,options)
 
+R=getR();
+
 %CONFUSED ON THIS BLOCK. COULD JUST SAY bc.dirichlet.faces=2
 bound_cell_out=1;
 bound_faces = G.cells.faces(G.cells.facePos(bound_cell_out):G.cells.facePos(bound_cell_out + 1) - ...
@@ -13,7 +15,7 @@ bc.dirichlet.faces =  bound_faces(bound_faces(:, 2) == 2 , 1);
 bc.dirichlet.pressure = outfluxFluid.pressure;
 bc.dirichlet.fluid=outfluxFluid
 % flash for surface properties
-[success_flag,stability_flag,Xiv,Xil,vapor_frac,cubic_time]=GI_flash(bc.dirichlet.fluid,thermo,options)
+[success_flag,stability_flag,Xiv,Xil,Zgas_vap, Zgas_liq, vapor_frac,cubic_time]=GI_flash(bc.dirichlet.fluid,thermo,options)
 bc.dirichlet.Xig=Xiv(1:3);
 bc.dirichlet.Xio=Xil(1:3);
 bc.dirichlet.So=.25; %Should be input from user %CHANGED!!! jb-07/18
@@ -22,9 +24,10 @@ bc.dirichlet.Sw=1-bc.dirichlet.So-bc.dirichlet.Sg; %for simplicity %CHANGED!!! j
 bc.dirichlet.Zi=bc.dirichlet.Xig*bc.dirichlet.Sg+bc.dirichlet.Xio*bc.dirichlet.So; %CHANGED V_FRAC DOESN'T EQUAL SG %CHANGED!!! jb-07/18
 %THE FOLLOWING NEEDS TO BE FROM PREOS, NEEDS TO BE CHANGED, RATIO OF NUM OF
 %MOLS TO GAS VOLUME %CHANGED!!!! jb-07/18
-%bc.dirichlet.Eio= 
-%bc.dirichlet.Eig=
+bc.dirichlet.Eo=bc.dirichlet.pressure/(Zgas_liq*R*outfluxFluid.temperature); 
+bc.dirichlet.Eg=bc.dirichlet.pressure/(Zgas_vap*R*outfluxFluid.temperature); 
 bc.dirichlet.F=bc.dirichlet.Eo*bc.dirichlet.So+bc.dirichlet.Eg*bc.dirichlet.Sg;
+bc.dirichlet.V=vapor_frac;
 
 bc.dirichlet.cwL=Xil(4);%SLIGHTLY CONFUSED ON WHAT cwL and Cw is, I know you told me
 bc.dirichlet.cwV=Xiv(4);

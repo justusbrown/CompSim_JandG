@@ -32,11 +32,11 @@ thermo=addThermo();
 thermo.EOS=@PREOS;
 
 
-influx_C  = [2.12,0.06,0.56,4.43];
+influx_C  = [2,4,3,1];
 influx_C  =mynormalize(influx_C);
-outflux_C = [2.12,0.06,0.56,4.43];
+outflux_C = [2,4,3,1];
 outflux_C=mynormalize(outflux_C);
-C_initial = [2.12,0.06,0.56,4.43]; 
+C_initial = [2,4,3,1]; 
 C_initial=mynormalize(C_initial);
 [component, comp_flag] = addComponents({'CO2','CH4','C10H22','H2O'})
 
@@ -55,7 +55,7 @@ bc=setupControls_JandG(rock,outflucFluid,thermo,options);
 
 %%
 %NOW INITIALIZING THE STATE
-[success_flag,stability_flag,vapor_y,liquid_x,vapor_frac,cubic_time]=GI_flash(initialFluid,thermo,options);
+[success_flag,stability_flag,vapor_y,liquid_x,vapor_frac,Zgas_vap, Zgas_liq, cubic_time]=GI_flash(initialFluid,thermo,options);
 
 numCells=G.cells.num;
 
