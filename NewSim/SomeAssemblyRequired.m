@@ -51,7 +51,9 @@ plotCellData(G,G.cells.indexMap), view(30,50), xlabel('x'), ylabel('y'),zlabel('
 
 %%
 %THIS IS WHERE setupControls WAS gr-07/19
-bc=setupControls_JandG(rock,outflucFluid,thermo,options);
+bc=setupControls_JandG(rock,outfluxFluid,influxFluid,influx_rate,thermo,options);
+
+%{
 
 %%
 %NOW INITIALIZING THE STATE
@@ -207,7 +209,7 @@ fluxC=cell(nComp,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
    %%AFTER MEETING WITH THE EXTERNSHIP GROUP
    
    
-
+%}
 
 
 

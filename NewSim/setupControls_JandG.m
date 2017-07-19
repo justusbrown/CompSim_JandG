@@ -1,12 +1,12 @@
 %%function setupControls_JandG
 
-function [bc]=setupControls_JandG(rock,outfluxFluid,thermo,options)
+function [bc]=setupControls_JandG(rock,outfluxFluid,influxFluid,influx_rate, thermo,options)
 
 R=getR();
 
 %CONFUSED ON THIS BLOCK. COULD JUST SAY bc.dirichlet.faces=2
 bound_cell_out=1;
-bound_faces = G.cells.faces(G.cells.facePos(bound_cell_out):G.cells.facePos(bound_cell_out + 1) - ...
+bound_faces = rock.G.cells.faces(rock.G.cells.facePos(bound_cell_out):rock.G.cells.facePos(bound_cell_out + 1) - ...
                               1 , :);
 bc.dirichlet.faces =  bound_faces(bound_faces(:, 2) == 2 , 1);
 %%
@@ -28,10 +28,12 @@ bc.dirichlet.Eo=bc.dirichlet.pressure/(Zgas_liq*R*outfluxFluid.temperature);
 bc.dirichlet.Eg=bc.dirichlet.pressure/(Zgas_vap*R*outfluxFluid.temperature); 
 bc.dirichlet.F=bc.dirichlet.Eo*bc.dirichlet.So+bc.dirichlet.Eg*bc.dirichlet.Sg;
 bc.dirichlet.V=vapor_frac;
+%bc.dirichlet.Ew=? DONT KNOW IF NEEDED HERE BUT DO NEED FOR INITIAL STATE
+%gr-7/19
 
-bc.dirichlet.cwL=Xil(4);%SLIGHTLY CONFUSED ON WHAT cwL and Cw is, I know you told me
-bc.dirichlet.cwV=Xiv(4);
-bc.dirichlet.Cw=Xiv(4)*vapor_frac+Xil(4)*(1-vapor_frac) %IM NOT SURE THIS IS ASSEMBLED CORRECTLY, BUT IM TRYING NOT TO FIXATE ON INDIVIDUAL LINES
+%WATERbc.dirichlet.cwL=Xil(4);%SLIGHTLY CONFUSED ON WHAT cwL and Cw is, I know you told me
+%WATERbc.dirichlet.cwV=Xiv(4);
+%WATERbc.dirichlet.Cw=Xiv(4)*vapor_frac+Xil(4)*(1-vapor_frac) %IM NOT SURE THIS IS ASSEMBLED CORRECTLY, BUT IM TRYING NOT TO FIXATE ON INDIVIDUAL LINES
 
 %  BELOW THIS CONFUSES ME
 %bc.dirichlet for outflux IS NOW DEFINED FOR Zi, F, Sw, and P ... (OUR PRIMARY VARIABLES)
