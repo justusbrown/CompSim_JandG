@@ -1,7 +1,7 @@
 function [success_flag,stability_flag,vapor_y,liquid_x,vapor_frac,Zgas_vap, Zgas_liq, cubic_time]=GI_flash(mixture,thermo,options)
 
 
-[stability_flag_l,stability_flag_g,stability_flag] = stabilityTest(mixture,thermo);
+[stability_flag_l,stability_flag_g,stability_flag, Zgas_vap, Zgas_liq] = stabilityTest(mixture,thermo);
 success_flag = 1;
 if stability_flag == 2
     success_flag = 0;
