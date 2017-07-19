@@ -2,12 +2,11 @@
 % liquid-vapor phase equilibia calculation
 % Define the components and load pure physsical properties
 z=[2.12,0.06,41.56,20.43,10.94,2.81,2.42,1.71,1.45,3.11,30.39];
-z0=z
 z=mynormalize(z);
 [component, comp_flag] = addComponents({'CO2','N2','CH4','C2H6','C3H8','C4H10','C4H10','C5H12','C5H12','C6H14','C8H18'});
 % Define the thermodynamic models
 T= 360; % [K]  temperature
-p= 20e6; % [Pa] pressure
+p= 1e6; % [Pa] pressure
 thermo = addThermo();
 thermo.EOS = @PREOS;
 mixture = addMixture(component, T, p);
