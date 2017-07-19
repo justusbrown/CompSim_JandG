@@ -56,25 +56,27 @@ bound_faces = G.cells.faces(G.cells.facePos(bound_cell_out):G.cells.facePos(boun
 bc.dirichlet.faces =  bound_faces(bound_faces(:, 2) == 2 , 1);
 %%
 %%
-%SET UP DIRICHLET CONDITION
+%SET UP DIRICHLET CONDITION, CHANGED!!!!
 bc.dirichlet.pressure = outflux_p;
 bc.dirichlet.fluid=outfluxFluid
 % flash for surface properties
 [success_flag,stability_flag,vapor_y,liquid_x,vapor_frac,cubic_time]=GI_flash(bc.dirichlet.fluid,thermo,options)
 bc.dirichlet.Xig=vapor_y(1:3);
 bc.dirichlet.Xio=liquid_x(1:3);
-bc.dirichlet.So=1-vapor_frac; %MIGHT NEED TO BE CHANGED BECAUSE WATER IS INCLUDED IN vapor_frac
-bc.dirichlet.Zi=bc.dirichlet.Xig*vapor_frac+bc.dirichlet.Xio*bc.dirichlet.So;%NEED TO KNOW WHAT vapor_frac IS. (does it include water?)
-%bc.dirichlet.Eio=bc.dirichlet.Xio./rock.pv; %THIS IS SUPPOSED TO BE DEFINITION OF Eio, MOLAR DENSITY, BUT I DO NOT THINK IT WORKS
-%bc.dirichlet.Eig=bc.dirichlet.Xig./rock.pv; %ALSO rock.pv IS A VECTOR CONTAINING PORE VOL OF EACH CELL, SO THIS NEEDS CHANGING, BUT NOT YET FOR CONCEP
-bc.dirichlet.Eo=sum(bc.dirichlet.Xio)/rock.pv(1);
-bc.dirichlet.Eg=sum(bc.dirichlet.Xig)/rock.pv(1); %HERE I AM TREATING MOLES AND MOLE FRACTIONS AS EQUIVALENT BUT I KNOW THATS NOT OKAY
-bc.dirichlet.F=bc.dirichlet.Eo*bc.dirichlet.So+bc.dirichlet.Eg*vapor_frac; %STILL NEED TO CLARIFY So, Sg,Sw, vs L and V
-bc.dirichlet.Sw=vapor_y(4)/sum(vapor_y)+liquid_x(4)/sum(liquid_x); %CHECK WITH XIAOMENG ON DEFINING Sw
-bc.dirichlet.cwL=liquid_x(4);
+bc.dirichlet.So=.25; %Should be input from user %CHANGED!!!
+bc.dirichlet.Sg=.30; %Should be input from user %CHANGED!!!
+bc.dirichlet.Sw=1-bc.dirichlet.So-bc.dirichlet.Sg; %for simplicity %CHANGED!!!
+bc.dirichlet.Zi=bc.dirichlet.Xig*bc.dirichlet.Sg+bc.dirichlet.Xio*bc.dirichlet.So; %CHANGED V_FRAC DOESN'T EQUAL SG %CHANGED!!!
+%THE FOLLOWING NEEDS TO BE FROM PREOS, NEEDS TO BE CHANGED, RATIO OF NUM OF
+%MOLS TO GAS VOLUME %CHANGED!!!!
+%bc.dirichlet.Eio= 
+%bc.dirichlet.Eig=
+bc.dirichlet.F=bc.dirichlet.Eo*bc.dirichlet.So+bc.dirichlet.Eg*bc.dirichlet.Sg;
+bc.dirichlet.cwL=liquid_x(4);%SLIGHTLY CONFUSED ON WHAT cwL and Cw is, I know you told me
 bc.dirichlet.cwV=vapor_y(4).*ones(numCells,1);
 bc.dirichlet.Cw=vapor_y(4)*vapor_frac+liquid_x(4)*(1-vapor_frac) %IM NOT SURE THIS IS ASSEMBLED CORRECTLY, BUT IM TRYING NOT TO FIXATE ON INDIVIDUAL LINES
 
+%  BELOW THIS CONFUSES ME
 %bc.dirichlet for outflux IS NOW DEFINED FOR Zi, F, Sw, and P ... (OUR PRIMARY VARIABLES)
 %NOW DEFINE DIRICHLET CONDITIONS FOR INFLUX
 bound_cell_in=8;
@@ -88,7 +90,7 @@ bc.water_influx=influx_rate*(liquid_x(4)*(1-vapor_frac)+vapor_y(4)*vapor_frac);
 %THIS IS THE END OF SETTING UP THE CONTROLS!!!
 %BEGINNING OF SETUP SYSTEM!!!!!!
 %
-% 
+%%
 % perlOneLineDescription(Setup the system)
 %  
 %  At the beginning of the simulation, we compute the non-dynamic variables such as
@@ -97,8 +99,6 @@ bc.water_influx=influx_rate*(liquid_x(4)*(1-vapor_frac)+vapor_y(4)*vapor_frac);
 % * the transmissibilities, |T|, 
 % * the discrete differential operators, |div| and |grad|,
 % * the gravity force contribution, |dz|,
-%
-%%
 
 function s = setupSystem(G, rock, bc, param)
 
@@ -266,9 +266,9 @@ function conc_f = faceConcentrations(flag, conc_c, bc_conc, N, interior, ...
    conc_f = M*conc_c + dconc;
    
 end
+%BEGINNING OF NONLINEAR SOLVER PARAMETERS, DIDN'T CHANGE, DOESN'T SEEM TO
+%NEED TO BE
 
-%BEGINNING OF NONLINEAR SOLVER PARAMETERS
-%NONLINEAR
 function nonlinear = setNonlinearSolverParameters(param)
 
     nonlinear.maxIterations = param.maxIterations;
@@ -284,12 +284,17 @@ function nonlinear = setNonlinearSolverParameters(param)
     nonlinear.relaxType = 'sor';
     nonlinear.tol = 1.0e-10;
 end
-
 %%
 %NOW INITIALIZING THE STATE
 [success_flag,stability_flag,vapor_y,liquid_x,vapor_frac,cubic_time]=GI_flash(initialFluid,thermo,options);
 
 numCells=G.cells.num;
+
+%FUTURE THOUGHTS:
+%1) THIS SATURATIONS WILL NEED TO BE BACK CALCULATED FROM THE PRESENT F
+%2) EPSILON IS EQUAL TO A RATIO OF MOLS/VOL OBTAINED FROM PREOS
+%3) V AND L WILL ALSO BE FROM PREOS
+%4) SW CAN THEN BE COMPUTED FROM OTHER SATURATIONS
 
 state.C=C_initial(1:4).*ones(numCells,1);
 state.Xig=vapor_y(1:3).*ones(numCells,1);
