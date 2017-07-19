@@ -43,12 +43,18 @@ switch num_root
        fug_need = 0;
     case 1
         zz = z_root(1);
+        Zgas_vap=zz;
+        Zgas_liq=zz;
     
     otherwise
         if phase == 2
            zz = max(z_root);
+           Zgas_vap=zz;
+           Zgas_liq=min(z_root);%I am not sure about this at all gr-7/19
         else
            zz = min(z_root);
+           Zgas_vap=max(z_root);
+           Zgas_liq=zz;
         end  
 end
 
