@@ -1,6 +1,6 @@
-function nonlinear = setNonlinearSolverParameters(param)
+function nonlinear = setNonlinearSolverParameters_JandG(maxIteration)
 
-    nonlinear.maxIterations = param.maxIterations;
+    nonlinear.maxIterations = maxIteration;
     % Relaxation parameters for Newton iterations
     nonlinear.relaxation  = 1;
     nonlinear.relaxMax    = 0.2;

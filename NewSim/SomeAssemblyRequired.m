@@ -136,11 +136,16 @@ bc=setupControls_JandG(rock,outfluxFluid,influxFluid,influx_rate,thermo,options)
    faceConcentrations = @(flag, conc_c, bc_conc) ...
        faceConcentrations_JandG(flag, conc_c, bc_conc, N, interior, dirichlet_faces2, ...
                           dirichlet_faces1,  bc, nf, nc);
+  %THIS IS THE END OF SETUP SYSTEM. I BELIEVE IT IS COMPLETE, and KNOW 
+  %THAT EVERYTHING STILL FUNCTIONS.
+  
+  %%NONLINEAR SOLVER PARAMETERS START HERE:
+   %SETUP NONLINEAR SOLVER WILL START HERE
+   maxIteration=50;
+   nonlinear=setNonlinearSolverParameters_JandG(maxIteration);
+   %Done setting up nonlinear solver gr 07/20
    
-
-
-
-   %SETUP SYSTEM WILL END HERE, AND SETUP NONLINE SOLVER WILL START HERE
+   %%NOW WE WILL INITIALIZE THE STATE USING initState_JandG
    %RIGHT AFTER INIT STATE IS BEING PUT IN NOW gr 07/20
    [state0]=initState_JandG(rock,initialFluid,options,thermo);
 
