@@ -21,7 +21,7 @@ options.trivial_eps = 1e-3;     %trivial shift for bisection algorithm
 options.RRiteration = 200;   %maximum number of Rachford Rice iteration using Newton's method
 options.max_outer_loop = 1000;   %max number of fugacity updates
 
-influx_p=13e6;
+influx_p=10e6;
 outflux_p=8e6;
 
 influx_rate = 1000/day  % in m^3/s
@@ -52,6 +52,30 @@ plotCellData(G,G.cells.indexMap), view(30,50), xlabel('x'), ylabel('y'),zlabel('
 %%
 %THIS IS WHERE setupControls WAS gr-07/19
 bc=setupControls_JandG(rock,outfluxFluid,influxFluid,influx_rate,thermo,options);
+
+%%
+%SETUP SYSTEM
+   cf = G.cells.faces(:,1);
+   nf = G.faces.num;
+   nc = G.cells.num;
+   %NOTE using rock.pv and rock.poro, don't want an s object like bravodome
+   %COMPUTE FULLTRANSMITIBILITY
+   rock.Tfull=1 ./ accumarray(cf,1./rock.T,[nf,1]);
+   rock.T=rock.Tfull;
+   
+   %SETUPDISCRETE DIVERGENCE OPERATOR
+   [C1,C2,C,div]=divOp_JandG(G, cf, nf, nc);
+   
+   %GAGE 7/19 STARTED SETTING UP SYSTEM. FINSHED DIVERGENCE OPERATOR. 
+   %CODE WORKS UP TO THIS POINT. NEED GRADIENT OPERATOR STILL.
+   %DECIDED TO KEEP SETUP SYSTEM IN THE CORE FILE. THIS WILL NOT BE THE
+   %CASEWITH ASSEMBLING THE EQUATIONS.
+   %NEXT STEP IS SETTING UP GRADIENT OPERATOR
+
+   
+
+
+
 
 %{
 
