@@ -168,15 +168,31 @@ nComp_C=3; %# OF NON WATER COMPONENTS
 %% 
 % HERE ARE THE TIME STEPS STARTINg FOR THE ITERATIONS
 
-%for tstep = 1 : numel(steps)
+for tstep = 1 : numel(steps)
+   % Call non-linear solver perlAddLink(solvefi)
+  [state, conv] = solvefi(state0, dt, bc, system, @eqAssembler, param) 
 
- %  dt = steps(tstep); 
+
+   dt = steps(tstep); 
    
 %EQUATION ASSEMBLING HAS BEEN MOVED TO eqAssembler_JandG.
    %THIS LINE IS JUST A TEST TO SEE IF THERE ARE ANY ERRORS MADE SO FAR: GR
    %07/20
-  equation=@(state) eqAssembler_JandG(rock,state0,state,dt,bc,dz,p_grad,div,faceConcentrations); 
+  % TESTLINE:equation=@(state) eqAssembler_JandG(rock,state0,state,dt,bc,dz,p_grad,div,faceConcentrations); 
 %EVERYTHING IS WORKING SOMEHOW... maybe not correctly, but its working
+
+   if ~(conv)
+      error('Convergence failed. Try smaller time steps.')
+      return
+   end
+
+   if param.do_save
+      save(fullfile(param.output_dir, sprintf('state%05d.mat', tstep)), 'state') 
+   end
+   state0 = state 
+   
+end
+
   
 
 
