@@ -26,7 +26,7 @@ bc.dirichlet.Sw=1-bc.dirichlet.So-bc.dirichlet.Sg; %for simplicity %CHANGED!!! j
 %RESPECTIVE MOLS?)
 %Thanks Justus, its fixed. gr 07/20
 bc.dirichlet.V=vapor_frac;
-bc.dirichlet.Zi=bc.dirichlet.Xig*bc.dirichlet.V+bc.dirichlet.Xio*(1-bc.dirichlet.V); %CHANGED V_FRAC DOESN'T EQUAL SG %CHANGED!!! jb-07/18
+bc.dirichlet.Zi=bc.dirichlet.Xig.*bc.dirichlet.V+bc.dirichlet.Xio.*(1-bc.dirichlet.V); %CHANGED V_FRAC DOESN'T EQUAL SG %CHANGED!!! jb-07/18
 %THE FOLLOWING NEEDS TO BE FROM PREOS, NEEDS TO BE CHANGED, RATIO OF NUM OF
 %MOLS TO GAS VOLUME %CHANGED!!!! jb-07/18
 bc.dirichlet.Eo=bc.dirichlet.pressure/(Zgas_liq*R*bc.dirichlet.fluid.temperature); 

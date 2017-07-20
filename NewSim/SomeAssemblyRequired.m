@@ -46,6 +46,8 @@ outfluxFluid=addMixture(component,Temp,outflux_p);
 outfluxFluid.mole_fraction=outflux_C;
 initialFluid=addMixture(component,Temp,outflux_p);
 initialFluid.mole_fraction=C_initial;
+
+
 clf
 plotCellData(G,G.cells.indexMap), view(30,50), xlabel('x'), ylabel('y'),zlabel('z'), colorbar
 
