@@ -1,15 +1,30 @@
 %NOW INITIALIZING THE STATE
-function [state0]=initState(rock,fluid,options,thermo);
+%My initial thoughts on this
+%1)Are these just intial values or are updates occuring in these vairables
+%2)Some values (So, Sg, and Sw are equal to direchlet?, I'm confused on the
+%difference
+function [state0]=initState(rock,fluid,options,thermo,Zgas_vap,Zgas_liq);
 
 [success_flag,stability_flag,Xiv,Xil,V,cubic_time]=GI_flash(fluid,thermo,options);
-
+R=getR()
 numCells=rock.G.cells.num;
 
 state.Xig=Xiv(1:3); %4 components. units=MOLig/MOLg
 state.Xio=Xil(1:3); %units=MOLio/MOLo
 state.Xwv=Xiv(4); %units=MOLwv/MOLw
 state.Xwl=Xil(4);
-state.vapor_frac=vapor_frac
+state.vapor_frac=vapor_frac;
+%CHANGED BELOW 7/19 JB
+state.So=.25;
+state.Sg=.30;
+state.Sw=1-state.So-state.Sg;
+%Gage, let me know where you got this formula, I may just be confused
+state.Zi=state.Xig*state.Sg+state.Xio*state.So;
+%I need change pressure and man up to make sure this is right
+state.Eo=state.pressure/(Zgas_liq*R*fluid.temperature); 
+state.Eg=state.pressure/(Zgas_vap*R*fluid.temperature); 
+state.F=state.Eo*state.So+state.Eg*state.Sg;
+
 
 
 
