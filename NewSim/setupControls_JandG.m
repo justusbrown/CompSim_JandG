@@ -2,7 +2,7 @@
 
 function [bc]=setupControls_JandG(rock,outfluxFluid,influxFluid,influx_rate, thermo,options)
 
-R=getR();
+R = getR_JandG();
 
 %CONFUSED ON THIS BLOCK. COULD JUST SAY bc.dirichlet.faces=2
 bound_cell_out=1;

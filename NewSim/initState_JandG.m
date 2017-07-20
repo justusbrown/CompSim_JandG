@@ -6,7 +6,7 @@
 function [state0]=initState_JandG(rock,fluid,options,thermo);
 
 [success_flag,stability_flag,Xiv,Xil,Zgas_vap,Zgas_liq,vapor_frac,cubic_time]=GI_flash(fluid,thermo,options);
-R=getR()
+R = getR_JandG();
 numCells=rock.G.cells.num;
 
 state.pressure=fluid.pressure;
