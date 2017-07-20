@@ -10,7 +10,15 @@
 % * the discrete differential operators, |div| and |grad|,
 % * the gravity force contribution, |dz|,
 
-function s = setupSystem(G, rock, bc, param)
+%%
+%IMPORTANT NOTE GR 07/20:
+%BravoDome has everything for the solver formated ass Cell arrays using {}.
+%We might have to change the character types on these. Shouldn't be
+%timely if so.
+%%
+%START FUNCTION
+
+function system = setupSystem(G, rock, bc, param)
 
    cf = G.cells.faces(:,1);
    nf = G.faces.num;

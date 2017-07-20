@@ -57,16 +57,16 @@ bc=setupControls_JandG(rock,outfluxFluid,influxFluid,influx_rate,thermo,options)
 
 %%
 %SETUP SYSTEM
-   cf = G.cells.faces(:,1);
-   nf = G.faces.num;
-   nc = G.cells.num;
+   cf = rock.G.cells.faces(:,1);
+   nf = rock.G.faces.num;
+   nc = rock.G.cells.num;
    %NOTE using rock.pv and rock.poro, don't want an s object like bravodome
    %COMPUTE FULLTRANSMITIBILITY
    rock.Tfull=1 ./ accumarray(cf,1./rock.T,[nf,1]);
    rock.T=rock.Tfull;
    
    %SETUPDISCRETE DIVERGENCE OPERATOR
-   [C1,C2,C,div]=divOp_JandG(G, cf, nf, nc);
+   [C1,C2,C_div,div]=divOp_JandG(rock.G, cf, nf, nc);
    
    %GAGE 7/19 STARTED SETTING UP SYSTEM. FINSHED DIVERGENCE OPERATOR. 
    %CODE WORKS UP TO THIS POINT. NEED GRADIENT OPERATOR STILL.
@@ -74,7 +74,60 @@ bc=setupControls_JandG(rock,outfluxFluid,influxFluid,influx_rate,thermo,options)
    %CASEWITH ASSEMBLING THE EQUATIONS.
    %NEXT STEP IS SETTING UP GRADIENT OPERATOR
    
+      % Set up the discrete gradient operator, |grad|. We compute the differences of cell values
+   % across each face. It is a linear mapping from cells' to faces' values.
+   N = double(rock.G.faces.neighbors);
+   index = 1:nf;
+   interior = prod(N, 2)~=0;
+
+   C1_interior = sparse(index(interior), N(interior, 1), ones(nnz(interior), 1), nf, nc);
+   C2_interior = sparse(index(interior), N(interior, 2), ones(nnz(interior), 1), nf, nc);
+
    
+   %%
+   % Compute the boundary contribution to the gradient operator. They corresponds to the
+   % external faces where Dirichlet conditions are given. We are careful to use the
+   % correct signs.
+   % 
+
+   is_dirichlet_faces1 = N(bc.dirichlet.faces, 1) ~= 0;
+   is_dirichlet_faces2 = ~is_dirichlet_faces1;
+
+   dirichlet_faces1 = bc.dirichlet.faces(is_dirichlet_faces1);
+   dirichlet_faces2 = bc.dirichlet.faces(is_dirichlet_faces2);
+
+   C1_exterior = sparse(index(dirichlet_faces1), ...
+                        N(dirichlet_faces1, 1), ...
+                        ones(numel(dirichlet_faces1), 1), nf, nc);
+   C2_exterior = sparse(index(dirichlet_faces2), ...
+                        N(dirichlet_faces2, 2), ...
+                        ones(numel(dirichlet_faces2), 1), nf, nc);
+                    
+   %%
+   % The gradient operator is the sum of internal and boundary contributions.
+   %
+   
+   C = C1_interior + C1_exterior - (C2_interior + C2_exterior);
+
+   pressure_bc = sparse(nf, 1);
+   pressure_bc(dirichlet_faces1) = - bc.dirichlet.pressure(is_dirichlet_faces1);
+   pressure_bc(dirichlet_faces2) = + bc.dirichlet.pressure(is_dirichlet_faces2);
+
+   p_grad = @(p)(C*p + pressure_bc);  
+
+   grad = @(val, bc_val)(grad_JandG(val, bc_val, nf, C, ...
+                                is_dirichlet_faces1, dirichlet_faces1, ... 
+                                is_dirichlet_faces2, dirichlet_faces2));
+
+%%
+   % Set up the gravity term.
+   %
+   
+   z = rock.G.cells.centroids(:, 3);
+   fz = rock.G.faces.centroids(:, 3);
+   dz = grad(z, fz);
+
+
 
    %SETUP SYSTEM WILL END HERE, AND SETUP NONLINE SOLVER WILL START HERE
    %RIGHT AFTER INIT STATE IS BEING PUT IN NOW gr 07/20

@@ -1,6 +1,6 @@
 %DIVERGENCE OPERATOR
 
-function [C1,C2,C,div]=divOp_JandG(G, cf, nf, nc);
+function [C1,C2,C_div,div]=divOp_JandG(G, cf, nf, nc);
 
 
    % Set up the discrete divergence operator, |div|. It sums up all signed faces'
@@ -13,8 +13,8 @@ function [C1,C2,C,div]=divOp_JandG(G, cf, nf, nc);
    faces2 = N(:, 2) ~= 0;
    C1  = sparse(index(faces1), N(faces1, 1), ones(nnz(faces1),1), nf, nc);
    C2  = sparse(index(faces2), N(faces2, 2), ones(nnz(faces2),1), nf, nc);
-   C = C1 - C2;
-   div  = @(x)C'*x;
+   C_div = C1 - C2;
+   div  = @(x)C_div'*x;
    
 end
 
