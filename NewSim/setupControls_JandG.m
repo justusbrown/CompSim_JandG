@@ -39,11 +39,11 @@ bc.dirichlet.V=vapor_frac;
 %bc.dirichlet for outflux IS NOW DEFINED FOR Zi, F, Sw, and P ... (OUR PRIMARY VARIABLES)
 %NOW DEFINE DIRICHLET CONDITIONS FOR INFLUX
 bound_cell_in=8;
-bc.influx_cells=bound_cell_in;
-[success_flag,stability_flag,vapor_y,liquid_x,vapor_frac,cubic_time]=GI_flash(influxFluid,thermo,options) %DONT SEEM TO USE ANYTHING FROM THIS FLASH TEST...WHY?
+bc.in.influx_cells=bound_cell_in;
+[success_flag,stability_flag,bc.in.Xiv,bc.in.Xil,bc.in.vapor_frac,cubic_time]=GI_flash(influxFluid,thermo,options) %DONT SEEM TO USE ANYTHING FROM THIS FLASH TEST...WHY?
 for ic=1:3 %DOING WATER SEPERATELY
-    bc.C_influx(ic)=influx_rate*(vapor_y(ic)*vapor_frac+liquid_x(ic)*(1-vapor_frac)); %IM NOT SURE IF THIS IS CORRECT EITHER
+    bc.in.C_influx(ic)=influx_rate*(bc.in.Xiv(ic)*bc.in.vapor_frac+bc.in.Xil(ic)*(1-bc.in.vapor_frac)); %IM NOT SURE IF THIS IS CORRECT EITHER
 end
-bc.water_influx=influx_rate*(liquid_x(4)*(1-vapor_frac)+vapor_y(4)*vapor_frac);
+bc.in.water_influx=influx_rate*(bc.in.Xil(4)*(1-bc.in.vapor_frac)+bc.in.Xiv(4)*bc.in.vapor_frac);
 
 %THIS IS THE END OF SETTING UP THE CONTROLS!!!
