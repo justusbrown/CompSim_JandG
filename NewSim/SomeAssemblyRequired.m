@@ -126,6 +126,17 @@ bc=setupControls_JandG(rock,outfluxFluid,influxFluid,influx_rate,thermo,options)
    z = rock.G.cells.centroids(:, 3);
    fz = rock.G.faces.centroids(:, 3);
    dz = grad(z, fz);
+   
+      %% 
+   % Define function to compute concentrations on faces using cells' values and upwind
+   % directions. Here, the _nature_ of the boundary faces (Dirichlet or note) are not
+   % allowed to change, although the _values_ on these faces may change.
+   %
+   
+   faceConcentrations = @(flag, conc_c, bc_conc) ...
+       faceConcentrations_JandG(flag, conc_c, bc_conc, N, interior, dirichlet_faces2, ...
+                          dirichlet_faces1,  bc, nf, nc);
+   
 
 
 
