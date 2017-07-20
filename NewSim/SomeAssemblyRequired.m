@@ -1,4 +1,8 @@
-%I COPY AND PASTED BUT HAVENT DONE ANYTHING YET
+%%
+%IMPORTANT NOTE GR 07/20:
+%BravoDome has everything for the solver formated ass Cell arrays using {}.
+%We might have to change the character types on these. Shouldn't be
+%timely if so.
 mrstModule add ad-fi 
 mrstModule add ad-core
 
