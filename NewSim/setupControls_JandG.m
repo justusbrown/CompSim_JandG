@@ -21,6 +21,9 @@ bc.dirichlet.Xio=Xil(1:3);
 bc.dirichlet.So=.25; %Should be input from user %CHANGED!!! jb-07/18
 bc.dirichlet.Sg=.30; %Should be input from user %CHANGED!!! jb-07/18
 bc.dirichlet.Sw=1-bc.dirichlet.So-bc.dirichlet.Sg; %for simplicity %CHANGED!!! jb-07/18
+%I THINK ZI NEEDS TO BE CALCULATED W/ A DIFF FORMULA, I MAY BE DEAD WRONG
+%BUT LOOKS DIFFERENT THAN WHAT I SAW IN MCCAINS (XIG AND XIO * NUM OF
+%RESPECTIVE MOLS?)
 bc.dirichlet.Zi=bc.dirichlet.Xig*bc.dirichlet.Sg+bc.dirichlet.Xio*bc.dirichlet.So; %CHANGED V_FRAC DOESN'T EQUAL SG %CHANGED!!! jb-07/18
 %THE FOLLOWING NEEDS TO BE FROM PREOS, NEEDS TO BE CHANGED, RATIO OF NUM OF
 %MOLS TO GAS VOLUME %CHANGED!!!! jb-07/18
