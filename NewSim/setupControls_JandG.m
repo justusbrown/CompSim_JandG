@@ -24,13 +24,15 @@ bc.dirichlet.Sw=1-bc.dirichlet.So-bc.dirichlet.Sg; %for simplicity %CHANGED!!! j
 %I THINK ZI NEEDS TO BE CALCULATED W/ A DIFF FORMULA, I MAY BE DEAD WRONG
 %BUT LOOKS DIFFERENT THAN WHAT I SAW IN MCCAINS (XIG AND XIO * NUM OF
 %RESPECTIVE MOLS?)
-bc.dirichlet.Zi=bc.dirichlet.Xig*bc.dirichlet.Sg+bc.dirichlet.Xio*bc.dirichlet.So; %CHANGED V_FRAC DOESN'T EQUAL SG %CHANGED!!! jb-07/18
+%Thanks Justus, its fixed. gr 07/20
+bc.dirichlet.V=vapor_frac;
+bc.dirichlet.Zi=bc.dirichlet.Xig*bc.dirichlet.V+bc.dirichlet.Xio*(1-bc.dirichlet.V); %CHANGED V_FRAC DOESN'T EQUAL SG %CHANGED!!! jb-07/18
 %THE FOLLOWING NEEDS TO BE FROM PREOS, NEEDS TO BE CHANGED, RATIO OF NUM OF
 %MOLS TO GAS VOLUME %CHANGED!!!! jb-07/18
-bc.dirichlet.Eo=bc.dirichlet.pressure/(Zgas_liq*R*outfluxFluid.temperature); 
-bc.dirichlet.Eg=bc.dirichlet.pressure/(Zgas_vap*R*outfluxFluid.temperature); 
+bc.dirichlet.Eo=bc.dirichlet.pressure/(Zgas_liq*R*bc.dirichlet.fluid.temperature); 
+bc.dirichlet.Eg=bc.dirichlet.pressure/(Zgas_vap*R*bc.dirichlet.fluid.temperature); 
 bc.dirichlet.F=bc.dirichlet.Eo*bc.dirichlet.So+bc.dirichlet.Eg*bc.dirichlet.Sg;
-bc.dirichlet.V=vapor_frac;
+
 %bc.dirichlet.Ew=? DONT KNOW IF NEEDED HERE BUT DO NEED FOR INITIAL STATE
 %gr-7/19
 
@@ -48,5 +50,5 @@ for ic=1:3 %DOING WATER SEPERATELY
     bc.in.C_influx(ic)=influx_rate*(bc.in.Xiv(ic)*bc.in.vapor_frac+bc.in.Xil(ic)*(1-bc.in.vapor_frac)); %IM NOT SURE IF THIS IS CORRECT EITHER
 end
 bc.in.water_influx=influx_rate*(bc.in.Xil(4)*(1-bc.in.vapor_frac)+bc.in.Xiv(4)*bc.in.vapor_frac);
-
+end
 %THIS IS THE END OF SETTING UP THE CONTROLS!!!

@@ -71,8 +71,12 @@ bc=setupControls_JandG(rock,outfluxFluid,influxFluid,influx_rate,thermo,options)
    %DECIDED TO KEEP SETUP SYSTEM IN THE CORE FILE. THIS WILL NOT BE THE
    %CASEWITH ASSEMBLING THE EQUATIONS.
    %NEXT STEP IS SETTING UP GRADIENT OPERATOR
-
    
+   
+
+   %SETUP SYSTEM WILL END HERE, AND SETUP NONLINE SOLVER WILL START HERE
+   %RIGHT AFTER INIT STATE IS BEING PUT IN NOW gr 07/20
+   [state0]=initState_JandG(rock,initialFluid,options,thermo);
 
 
 
