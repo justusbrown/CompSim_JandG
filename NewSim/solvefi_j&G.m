@@ -29,9 +29,7 @@ function [state, convergence] = solvefi_J&G(rock,state0, dt, bc, dz,p_grad,div,f
 
    fprintf('%13s%-26s%-36s\n', '', 'CNV (oil, water)', 'MB (oil, water)');
    
-   %DON'T REALLY UNDERSTAND THIS PART
-   %LITERALLY JUST MAKING IT SO THAT WE TYPE EQUATION INSTEAD @eqsAssemble
-  % ANY "SYSTEM" HAS TO GO gr 07/20
+
    equation = @(state) equation(rock, state0, state, dt, bc,dz,p_grad,div,faceConcentrations); system);
    flash=@(state.fluid) GI_flash(state.fluid,thermo,options);
    %%
@@ -48,10 +46,9 @@ function [state, convergence] = solvefi_J&G(rock,state0, dt, bc, dz,p_grad,div,f
       % saturation variable.
       % %GET RID OF C
       %PROBABLY WONT NEED THIS[C, p] = deal(state.C, state.pressure);
-[Sw,p]=deal(state.Sw,state.pressure);
+[Sw, p, F, Zi]=deal(state.Sw, state.pressure, state.F, state.Zi);
       %JUST REALIZED, ITHINK Sg NEEDS TO DEPEND ON Sw AND NOT VICE VERSA
 state.fluid.pressure=p;
-
 [success_flag,stability_flag,Xiv,Xil,Zgas_vap, Zgas_liq, vapor_frac,cubic_time]=flash(state.fluid);
 
 %%
