@@ -146,6 +146,8 @@ bc=setupControls_JandG(rock,outfluxFluid,influxFluid,influx_rate,thermo,options)
    %SETUP NONLINEAR SOLVER WILL START HERE
    maxIteration=50;
    system.nonlinear=setNonlinearSolverParameters_JandG(maxIteration);
+   system.cellwise  = 1:5  % Used in function getResiduals which checks convergence.
+
    %Done setting up nonlinear solver gr 07/20
    
    %%NOW WE WILL INITIALIZE THE STATE USING initState_JandG
