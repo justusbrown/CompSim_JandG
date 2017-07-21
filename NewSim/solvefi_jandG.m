@@ -8,10 +8,10 @@
 % The discretized residual equation are given by |equation| which is assembled in the
 % function |equationCompositional|. 
 %%
-function [state, convergence] = solvefi_J&G(rock,state0, dt, bc, dz,p_grad,div,faceConcentrations, equation,options,varargin)
+function [state, convergence] = solvefi_JandG(system, rock,state0, dt, bc, dz,p_grad,div,faceConcentrations, equation,options)
 %
-   opt = struct('verbose', false);
-   opt = merge_options(opt, varargin{:});
+   %opt = struct('verbose', false);
+   %opt = merge_options(opt, varargin{:});
 
    fluid = state.fluid;%changed to state, didn't see system anywhere else in our code
    

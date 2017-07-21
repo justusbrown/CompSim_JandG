@@ -6,7 +6,7 @@
 mrstModule add ad-fi 
 mrstModule add ad-core
 
-G = cartGrid([6, 6, 6]);
+G = cartGrid([2, 2, 2]);
 G = computeGeometry(G);
 % Disable gravity
 gravity off
@@ -173,7 +173,7 @@ nComp_C=3; %# OF NON WATER COMPONENTS
 
 for tstep = 1 : numel(steps)
    % Call non-linear solver perlAddLink(solvefi)
-  [state, conv] = solvefi_J&G(rock,state0, dt, bc, dz,p_grad,div,faceConcentrations, equation,options,varargin)
+  [state, conv] = solvefi_JandG(system, rock,state0, dt, bc, dz,p_grad,div,faceConcentrations, @eqAssembler,options)
   %SOLVEFI IS NOT GONNA CONTAIN SYSTEM OR PARAM. IT WILL CONTAIN OTHER
   %THINGS
 
