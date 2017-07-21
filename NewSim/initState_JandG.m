@@ -24,7 +24,8 @@ state.Zi=state.Xig.*state.V+state.Xio.*(1-state.V); %ALREADY Added to each cell
 state.Eo=state.pressure/(Zgas_liq*R*state.fluid.temperature); %ALREADY Added to each cell
 state.Eg=state.pressure/(Zgas_vap*R*state.fluid.temperature); %ALREADY Added to each cell
 state.F=(state.Eo.*state.So+state.Eg.*state.Sg);%ALREADY Added to each cell
-
+state.Ew=55.5; %THIS IS A PLACEHOLDER
+%ONLY MISSING Ew
 
 %CONSTANT VISCOSITIES & COMPRESSIBILITY (which I don't know if I need atm)
 

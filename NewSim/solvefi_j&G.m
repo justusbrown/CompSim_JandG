@@ -48,8 +48,19 @@ function [state, convergence] = solvefi_J&G(rock,state0, dt, bc, dz,p_grad,div,f
       %PROBABLY WONT NEED THIS[C, p] = deal(state.C, state.pressure);
 [Sw, p, F, Zi]=deal(state.Sw, state.pressure, state.F, state.Zi);
       %JUST REALIZED, ITHINK Sg NEEDS TO DEPEND ON Sw AND NOT VICE VERSA
-state.fluid.pressure=p;
+state.fluid.pressure=p; %Update the fluids pressure since its seperate from P 
+state.fluid.mole_fraction=Zi;%Update fluids mole fraction since its seperate from Zi
 [success_flag,stability_flag,Xiv,Xil,Zgas_vap, Zgas_liq, vapor_frac,cubic_time]=flash(state.fluid);
+
+state.Xig=Xiv(1:3);
+state.Xio=Xil(1:3); %units=MOLio/MOLo
+state.Xwv=Xiv(4); %units=MOLwv/MOLw
+state.Xwl=Xil(4);
+state.V=vapor_frac;
+state.Eo=state.pressure/(Zgas_liq*R*state.fluid.temperature); 
+state.Eg=state.pressure/(Zgas_vap*R*state.fluid.temperature); 
+state.Ew=55.5; %THIS IS A PLACEHOLDER
+
 
 %%
 %THIS SECTION NEEDS TO BE CHECKED TO SEE IF YOU AGREE
@@ -58,20 +69,7 @@ state.fluid.pressure=p;
 %state.Sw=1-state.So-state.Sg;
 
 %THESE NEED TO BE UPDATED THROUGH PVT INFO JB 7/21
-state.Xig=Xiv(1:3); %4 components. units=MOLig/MOLg
-state.Xio=Xil(1:3); %units=MOLio/MOLo
-state.Xwv=Xiv(4); %units=MOLwv/MOLw
-state.Xwl=Xil(4);
-state.V=vapor_frac;
-state.Zi=state.Xig.*state.V+state.Xio.*(1-state.V); 
 
-%THESE LINES LOOK GOOD JB 7/21
-state.Eo=state.pressure/(Zgas_liq*R*state.fluid.temperature); 
-state.Eg=state.pressure/(Zgas_vap*R*state.fluid.temperature); 
-
-%THE LINE BENEATH THIS IS NOT NEED AS IT IS A PRIMARY VARIABLE IF
-%ANYTHING WE COULD USE CURRENT F TO BACK CALCULATE THE SO AND SG JB 07/21
-%state.F=(state.Eo.*state.So+state.Eg.*state.Sg);
 
 %%
 %Still need Ew!!!!!!!!
