@@ -8,15 +8,6 @@
 % The discretized residual equation are given by |equation| which is assembled in the
 % function |equationCompositional|. 
 %%
-%{
-Notes to self about input args:
-1) Am changing all variables to state as opposed to system
-2) Keep system command
-3) Not sure what Equation is doing
-4) Param is used in the loop for solvefi
-5) varargin just allow for more inputs if need be
-%}
-%%
 function [state, convergence] = solvefi_J&G(rock,state0, dt, bc, dz,p_grad,div,faceConcentrations, equation,options,  varargin)
 %
    opt = struct('verbose', false);

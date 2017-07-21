@@ -143,7 +143,6 @@ bc=setupControls_JandG(rock,outfluxFluid,influxFluid,influx_rate,thermo,options)
   %THIS IS THE END OF SETUP SYSTEM. I BELIEVE IT IS COMPLETE, and KNOW 
   %THAT EVERYTHING STILL FUNCTIONS.
   
-  %%NONLINEAR SOLVER PARAMETERS START HERE:
    %SETUP NONLINEAR SOLVER WILL START HERE
    maxIteration=50;
    nonlinear=setNonlinearSolverParameters_JandG(maxIteration);
@@ -151,6 +150,8 @@ bc=setupControls_JandG(rock,outfluxFluid,influxFluid,influx_rate,thermo,options)
    
    %%NOW WE WILL INITIALIZE THE STATE USING initState_JandG
    %gr 07/20
+   %STUPID QUESTION, SHOULD WE BE CALLING initialFluid in the
+   %initState_JandG sheet as well: [state0]=initState_JandG(rock,fluid,options,thermo);
    [state0]=initState_JandG(rock,initialFluid,options,thermo);
     %AND THE STATE IS INITIALIZED AS state0
 

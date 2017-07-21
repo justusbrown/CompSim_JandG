@@ -5,6 +5,7 @@ function [bc]=setupControls_JandG(rock,outfluxFluid,influxFluid,influx_rate, the
 R = getR_JandG();
 
 %CONFUSED ON THIS BLOCK. COULD JUST SAY bc.dirichlet.faces=2
+%NOT SURE I REALLY GET THIS EITHER
 bound_cell_out=1;
 bound_faces = rock.G.cells.faces(rock.G.cells.facePos(bound_cell_out):rock.G.cells.facePos(bound_cell_out + 1) - ...
                               1 , :);
@@ -18,31 +19,26 @@ bc.dirichlet.fluid=outfluxFluid
 [success_flag,stability_flag,Xiv,Xil,Zgas_vap, Zgas_liq, vapor_frac,cubic_time]=GI_flash(bc.dirichlet.fluid,thermo,options)
 bc.dirichlet.Xig=Xiv(1:3);
 bc.dirichlet.Xio=Xil(1:3);
-bc.dirichlet.So=.25; %Should be input from user %CHANGED!!! jb-07/18
-bc.dirichlet.Sg=.30; %Should be input from user %CHANGED!!! jb-07/18
-bc.dirichlet.Sw=1-bc.dirichlet.So-bc.dirichlet.Sg; %for simplicity %CHANGED!!! jb-07/18
-%I THINK ZI NEEDS TO BE CALCULATED W/ A DIFF FORMULA, I MAY BE DEAD WRONG
-%BUT LOOKS DIFFERENT THAN WHAT I SAW IN MCCAINS (XIG AND XIO * NUM OF
-%RESPECTIVE MOLS?)
-%Thanks Justus, its fixed. gr 07/20
+%SINCE THIS IS A BOUNDARY CONDITION, I GUESS IT CAN BE A SINGLE VALUE? JB
+%7/21
+bc.dirichlet.So=.25; 
+bc.dirichlet.Sg=.30; 
+bc.dirichlet.Sw=1-bc.dirichlet.So-bc.dirichlet.Sg;
 bc.dirichlet.V=vapor_frac;
 bc.dirichlet.Zi=bc.dirichlet.Xig.*bc.dirichlet.V+bc.dirichlet.Xio.*(1-bc.dirichlet.V); %CHANGED V_FRAC DOESN'T EQUAL SG %CHANGED!!! jb-07/18
-%THE FOLLOWING NEEDS TO BE FROM PREOS, NEEDS TO BE CHANGED, RATIO OF NUM OF
-%MOLS TO GAS VOLUME %CHANGED!!!! jb-07/18
 bc.dirichlet.Eo=bc.dirichlet.pressure/(Zgas_liq*R*bc.dirichlet.fluid.temperature); 
 bc.dirichlet.Eg=bc.dirichlet.pressure/(Zgas_vap*R*bc.dirichlet.fluid.temperature); 
 bc.dirichlet.F=bc.dirichlet.Eo*bc.dirichlet.So+bc.dirichlet.Eg*bc.dirichlet.Sg;
 
 %bc.dirichlet.Ew=? DONT KNOW IF NEEDED HERE BUT DO NEED FOR INITIAL STATE
-%gr-7/19
+%gr-7/19%YES, WE WILL NEED INITIAL VALUES FOR ALL VARIABLE (BOTH PRIMARY AND
+%SECONDARY) JB 7/21
 
 %WATERbc.dirichlet.cwL=Xil(4);%SLIGHTLY CONFUSED ON WHAT cwL and Cw is, I know you told me
 %WATERbc.dirichlet.cwV=Xiv(4);
 %WATERbc.dirichlet.Cw=Xiv(4)*vapor_frac+Xil(4)*(1-vapor_frac) %IM NOT SURE THIS IS ASSEMBLED CORRECTLY, BUT IM TRYING NOT TO FIXATE ON INDIVIDUAL LINES
 
-%  BELOW THIS CONFUSES ME
-%bc.dirichlet for outflux IS NOW DEFINED FOR Zi, F, Sw, and P ... (OUR PRIMARY VARIABLES)
-%NOW DEFINE DIRICHLET CONDITIONS FOR INFLUX
+
 bound_cell_in=8;
 bc.in.influx_cells=bound_cell_in;
 [success_flag,stability_flag,bc.in.Xiv,bc.in.Xil,bc.in.vapor_frac,cubic_time]=GI_flash(influxFluid,thermo,options) %DONT SEEM TO USE ANYTHING FROM THIS FLASH TEST...WHY?
@@ -51,4 +47,3 @@ for ic=1:3 %DOING WATER SEPERATELY
 end
 bc.in.water_influx=influx_rate*(bc.in.Xil(4)*(1-bc.in.vapor_frac)+bc.in.Xiv(4)*bc.in.vapor_frac);
 end
-%THIS IS THE END OF SETTING UP THE CONTROLS!!!

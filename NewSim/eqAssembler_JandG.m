@@ -24,24 +24,28 @@
    Ew=state.Ew;
    So=state.So;
    
+   %WHERE SHOULD THESE VALUES COME FROM, I KNOW IT IS COMPUTE WATER COMP IN
+   %BRAVO DOME FOR A GIVEN SET OF THEIR PRIMARY VARIABLES JB 7/21
    cwL=state.cwL%NED TO THINK ABOUT ALL OF THESE WATER TERMS gr 07/20
    cwV=state.cwV
    Cw=state.Cw
    
    [p,F,Zi,Sw]=initVariablesADI(p,F,Zi,Sw); %DOES THIS MAKE Xi* ADI ALSO? I BELIEVE IT DOES
    
+   %DOES ALL OF THIS NEED TO BE INCLUDED, COMMENTED OUT WHAT ISN'T USED IN
+   %THIS SHEET. JB 7/21
    fluid0=state0.fluid;%NEEDS THOUGHT: %THIS ACCOUNTS FOR TEMPERATURE AND PRESSURE, SO I MAY BE BEING SLOPPY?REPETITIVE HERE
-   p0=state0.pressure;
-   F0=state0.F;
-   Zi0=state0.Zi
-   Sw0=state0.Sw
-   Xig0=state0.Xig;
-   Xio0=state0.Xio;
-   Ew0=state0.Ew;
-   So0=state0.So;
-   cwL0=state0.cwL
-   cwV0=state0.cwV
-   Cw0=state0.Cw %I DONT KNOW IF ALL OF THIS IS NECESSARY
+   F0=state0.F;%USED LATER
+   Zi0=state0.Zi%USED LATER
+   Sw0=state0.Sw%USED LATER
+   Ew0=state0.Ew;%USED LATER
+   %p0=state0.pressure;
+   %So0=state0.So;
+   %Xig0=state0.Xig;
+   %Xio0=state0.Xio;
+   %cwL0=state0.cwL;
+   %cwV0=state0.cwV;
+   %Cw0=state0.Cw; %I DONT KNOW IF ALL OF THIS IS NECESSARY
    
 [krL,krG]=quadraticRelPerm(So);
 bd=bc.dirichlet;
@@ -91,6 +95,8 @@ fluxC=cell(nComp,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
     %DONE COMPUTING RESIDUAL FOR WATER
     %%STILL NEED Ew gr 07/20
     %I GUESS WE DO NEED cw stuff gr 07/20
+    %DO WE HAVE CWV AND SUCH, SEEMS LIKE A LOT OF THIS IS DONE IN
+    %COMPUTEWATER IN BRAVO, ANY THOUGHTS? JB 7/21
     
     %%
     %COMPUTE THE GLOBAL FLOW RESIDUAL
@@ -122,10 +128,6 @@ fluxC=cell(nComp,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
     
    end
     %DONE ADDING INPUT FLUXES
-     %THIS IS THE END OF SETTING UP THE EQUATIONS!!!!!!!!!!!!!
-   %%NOW CONTINUING WITH SOLVE FI %%I MIGHT WANT TO MAKE THIS EQUATION
-   %%ASSEMLE PART SEPERATE. IM GOING TO BED, ILL ASK XIAOMENG TOMORROW
-   %%AFTER MEETING WITH THE EXTERNSHIP GROUP
    
    
 
