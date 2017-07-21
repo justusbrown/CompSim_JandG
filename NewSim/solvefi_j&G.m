@@ -51,32 +51,38 @@ function [state, convergence] = solvefi_J&G(rock,state0, dt, bc, dz,p_grad,div,f
 [Sw,p]=deal(state.Sw,state.pressure);
       %JUST REALIZED, ITHINK Sg NEEDS TO DEPEND ON Sw AND NOT VICE VERSA
 state.fluid.pressure=p;
+%ANOTHER STUPID QUESTION: SHOULDN'T THIS BE GI?
 [success_flag,stability_flag,Xiv,Xil,Zgas_vap, Zgas_liq, vapor_frac,cubic_time]=flash(state.fluid);
+
+%%
+%THIS SECTION NEEDS TO BE CHECKED TO SEE IF YOU AGREE
+%THE LINE BENEATH THIS I THINK IS NOT NEEDED, SW IS A PRIMARY VARIABLE
+%WHICH IS SOLVED FOR IN THE NEWTON ITERATION, WE ONLY NEED THE INITIAL CONDITION TO GET US STARTED JB 7/21
+%state.Sw=1-state.So-state.Sg;
+
+%THESE NEED TO BE UPDATED THROUGH PVT INFO JB 7/21
 state.Xig=Xiv(1:3); %4 components. units=MOLig/MOLg
 state.Xio=Xil(1:3); %units=MOLio/MOLo
 state.Xwv=Xiv(4); %units=MOLwv/MOLw
 state.Xwl=Xil(4);
 state.V=vapor_frac;
-%CHANGED BELOW 7/19 JB
-%state.So=.25; THIS WILL BE SOLVED FOR
-%state.Sg=.30; THIS ALSO
-%THESE SHOULD BE SOLVED FOR THIS TIME HERE I THINK.
-state.Sw=1-state.So-state.Sg;
 state.Zi=state.Xig.*state.V+state.Xio.*(1-state.V); 
+
+%THESE LINES LOOK GOOD JB 7/21
 state.Eo=state.pressure/(Zgas_liq*R*state.fluid.temperature); 
 state.Eg=state.pressure/(Zgas_vap*R*state.fluid.temperature); 
-state.F=(state.Eo.*state.So+state.Eg.*state.Sg);
-%IM TIRED AND CONFUSED LOL, WE ARE GOING TO SOLVE FOR THESE DIFFERENTLY
-%THAN I CURRENTLY HAVE IT THOUGH PROBABLY. BUT THIS IS IN THE RIGHT
-%DIRECTION GR 07/20
-%Still need Ew
-      %nc = numel(p);
-      %state.sL=state.So+state.Sg; %ADDED!!! jb 7/20
-      %init_sL = state.sL; 
-      %Cvec = cell2mat(C);
-      %[cg, cl, cw, s, Cw] = flash_calculation(Cvec, p, system, init_sL);
-      %state.sL = s(:, 2);
-      
+
+%THE LINE BENEATH THIS IS NOT NEED AS IT IS A PRIMARY VARIABLE IF
+%ANYTHING WE COULD USE CURRENT F TO BACK CALCULATE THE SO AND SG JB 07/21
+%state.F=(state.Eo.*state.So+state.Eg.*state.Sg);
+
+%%
+%Still need Ew!!!!!!!!
+%MY THOUGHTS: JB 7/21
+%MOLARITY IN MY THOUGHTS IS MORE OF A MIXTURE PROPERTY, IF WATER IS A PURE
+%SUBSTANCE, DOES THE MOLARITY VARY MUCH? IF IS DOESN'T, WE CAN HARD CODE A
+%VALUE (THIS SEEMS TO EASY), IF NOT, THE EW WILL CHANGE AND NEED UPDATING
+%THROUGH PVT INFORMATION JB 7/21
       %%
       % The residual equations for the whole system (pressure, total concentrations,
       % liquid saturation) are assembled.
