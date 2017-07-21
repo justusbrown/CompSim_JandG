@@ -25,7 +25,6 @@ state.Sw=1.*ones(numCells,1)-state.So-state.Sg;
 %Gage, let me know where you got this formula, I may just be confused
 %Thanks Justus, its fixed. gr 07/20
 state.Zi=state.Xig.*state.V+state.Xio.*(1-state.V); %ALREADY Added to each cell
-%I need change pressure and man up to make sure this is right
 state.Eo=state.pressure/(Zgas_liq*R*state.fluid.temperature); %ALREADY Added to each cell
 state.Eg=state.pressure/(Zgas_vap*R*state.fluid.temperature); %ALREADY Added to each cell
 state.F=(state.Eo.*state.So+state.Eg.*state.Sg);%ALREADY Added to each cell
