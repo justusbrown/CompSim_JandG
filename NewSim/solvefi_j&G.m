@@ -95,7 +95,7 @@ state.Ew=55.5; %THIS IS A PLACEHOLDER
       %%
       % We update |state|. see below for equation
       %
-      state      = updateState(state, dx, system);
+      state      = updateState_JandG(state, dx, 3);
       %STOPPED HERE
       %%
       % We compute the residual values by calling |getResiduals|.
@@ -135,27 +135,4 @@ state.Ew=55.5; %THIS IS A PLACEHOLDER
 
 end
 
-%% 
-% Update function
-%
-% Given a Newton step, the state variables are updated. We cap the saturation variable.
-%
 
-function state = updateState(state, dx, system)
-
-   nComp = system.nComp;
-   dp = dx{1};
-   for ic = 1 : nComp
-      dC{ic} = dx{ic + 1};
-   end
-   dsL = dx{nComp + 2};
-    
-   step = 1;
-
-   state.pressure = state.pressure + step*dp;
-   for ic = 1 : nComp
-      state.C{ic} = max(0, state.C{ic} + step*dC{ic});
-   end
-   state.sL = min(1, max(0, state.sL + step*dsL));
-   
-end
