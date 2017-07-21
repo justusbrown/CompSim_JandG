@@ -43,6 +43,8 @@
    %So0=state0.So;
    %Xig0=state0.Xig;
    %Xio0=state0.Xio;
+   
+   %STILL NEED TO BE COMPUTED
    %cwL0=state0.cwL;
    %cwV0=state0.cwV;
    %Cw0=state0.Cw; %I DONT KNOW IF ALL OF THIS IS NECESSARY
@@ -116,7 +118,7 @@ fluxC=cell(nComp,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
     %DONE COMPUTING GLOBAL FLOW EQ
     
     %COMPUTE THE SATURATION RESIDUAL EQUATION
-    eqs{nComp+3}=(F)*((So)/(Eo)+(Sg)/(Eg))+(Sw)-1;
+    eqs{nComp+3}=(F)*((1-V)/(Eo)+(V)/(Eg))+(Sw)-1;
     %DONE COMPUTING THE RESIDUAL FOR SATURATION
 
         
