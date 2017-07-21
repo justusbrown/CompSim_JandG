@@ -145,7 +145,7 @@ bc=setupControls_JandG(rock,outfluxFluid,influxFluid,influx_rate,thermo,options)
   
    %SETUP NONLINEAR SOLVER WILL START HERE
    maxIteration=50;
-   nonlinear=setNonlinearSolverParameters_JandG(maxIteration);
+   system.nonlinear=setNonlinearSolverParameters_JandG(maxIteration);
    %Done setting up nonlinear solver gr 07/20
    
    %%NOW WE WILL INITIALIZE THE STATE USING initState_JandG
