@@ -171,6 +171,8 @@ nComp_C=3; %# OF NON WATER COMPONENTS
 for tstep = 1 : numel(steps)
    % Call non-linear solver perlAddLink(solvefi)
   [state, conv] = solvefi(state0, dt, bc, system, @eqAssembler, param) 
+  %SOLVEFI IS NOT GONNA CONTAIN SYSTEM OR PARAM. IT WILL CONTAIN OTHER
+  %THINGS
 
 
    dt = steps(tstep); 

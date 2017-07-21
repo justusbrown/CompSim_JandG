@@ -92,22 +92,28 @@ fluxC=cell(nComp,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
     %%STILL NEED Ew gr 07/20
     %I GUESS WE DO NEED cw stuff gr 07/20
     
+    %%
     %COMPUTE THE GLOBAL FLOW RESIDUAL
-           bc_val = bd.Xig{ic}.*bc_mobG + bd.Xio{ic}.*bc_mobL; 
-       fluxT = faceConcentrations(upC{ic}, Xig{ic}.*mobG + Xio{ic}.*mobL, bc_val);
+    %
+    %First need to define things: avg. MW, global dpC and global upC
+    %gr 07/20
+    avgMW=sum(fluid.mole_fraction(1:3).*fluid.component.MW(1:3));
+    dpC_total = s.p_grad(p) - g*(avgMW.*dz); 
+    upC_total = (double(dpC_total)>=0);
+
+    bc_val = bd.V.*bc_mobG + (1-bd.V).*bc_mobL; 
+    fluxT = faceConcentrations(upC_total, V*mobG + (1-V).*mobL, bc_val);
+       %CHANGED Xia to V an 1-V. dpC{ic} NEEDS THOUGHT HERE AND I need to
+       %find out if faceConc can take in a single value for varagin 2
        %%THIS NEEDS THOUGHT gr 07/20
-    eqs{nComp+2}=(rock.pv/dt).*(F-F0)+div(fluxT{ic}.*rock.T.*dpC{ic}); %THE SECOND TERM IS SAME AS FOR INDIVIDUAL COMPONENTS. THIS MUST CHANGE
+    eqs{nComp+2}=(rock.pv/dt).*(F-F0)+div(fluxT.*rock.T.*dpC_total); %THE SECOND TERM IS SAME AS FOR INDIVIDUAL COMPONENTS. THIS MUST CHANGE
     %DONE COMPUTING GLOBAL FLOW EQ
     
     %COMPUTE THE SATURATION RESIDUAL EQUATION
     eqs{nComp+3}=(F)*((So)/(Eo)+(Sg)/(Eg))+(Sw)-1;
     %DONE COMPUTING THE RESIDUAL FOR SATURATION
-    %NEED TO KNOW WHAT IS SUBTRACTED AND WHAT ISNT. PROBABLY PRETTY EASY TO
-    %LOOK UP gr 07/20
-    
-    
-    %DO JUST PRIMARY VARIABLES NEED TO BE (X-X0)???? gr 07/20
-    
+
+        
     %ADD INPUT FLUX
     for ic = 1 : nComp
        eqs{ic}(bc.influx_cells) = eqs{ic}(bc.influx_cells) - bc.C_influx{ic};
