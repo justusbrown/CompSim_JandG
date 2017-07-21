@@ -69,6 +69,7 @@ state.V=vapor_frac;
 %CHANGED BELOW 7/19 JB
 %state.So=.25; THIS WILL BE SOLVED FOR
 %state.Sg=.30; THIS ALSO
+%THESE SHOULD BE SOLVED FOR THIS TIME HERE I THINK.
 state.Sw=1-state.So-state.Sg;
 state.Zi=state.Xig.*state.V+state.Xio.*(1-state.V); 
 state.Eo=state.pressure/(Zgas_liq*R*state.fluid.temperature); 
@@ -77,6 +78,7 @@ state.F=(state.Eo.*state.So+state.Eg.*state.Sg);
 %IM TIRED AND CONFUSED LOL, WE ARE GOING TO SOLVE FOR THESE DIFFERENTLY
 %THAN I CURRENTLY HAVE IT THOUGH PROBABLY. BUT THIS IS IN THE RIGHT
 %DIRECTION GR 07/20
+%Still need Ew
       %nc = numel(p);
       %state.sL=state.So+state.Sg; %ADDED!!! jb 7/20
       %init_sL = state.sL; 
@@ -95,6 +97,8 @@ state.F=(state.Eo.*state.So+state.Eg.*state.Sg);
       % We call a standard linear solve to compute the Newton step |dx|.
       
       dx = SolveEqsADI(eqs, []);
+      
+      %UPDATE STATE WILL CHANGE
       
       %%
       % We update |state|. see below for equation
