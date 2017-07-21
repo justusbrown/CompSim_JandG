@@ -51,7 +51,7 @@ function [state, convergence] = solvefi_J&G(rock,state0, dt, bc, dz,p_grad,div,f
 [Sw,p]=deal(state.Sw,state.pressure);
       %JUST REALIZED, ITHINK Sg NEEDS TO DEPEND ON Sw AND NOT VICE VERSA
 state.fluid.pressure=p;
-%ANOTHER STUPID QUESTION: SHOULDN'T THIS BE GI?
+
 [success_flag,stability_flag,Xiv,Xil,Zgas_vap, Zgas_liq, vapor_frac,cubic_time]=flash(state.fluid);
 
 %%
