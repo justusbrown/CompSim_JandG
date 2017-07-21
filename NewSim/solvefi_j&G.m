@@ -17,7 +17,7 @@ Notes to self about input args:
 5) varargin just allow for more inputs if need be
 %}
 %%
-function [state, convergence] = solvefi_J&G(state0, dt, bc, system, equation, param,  varargin)
+function [state, convergence] = solvefi_J&G(rock,state0, dt, bc, dz,p_grad,div,faceConcentrations, equation,options,  varargin)
 %
    opt = struct('verbose', false);
    opt = merge_options(opt, varargin{:});
@@ -39,8 +39,10 @@ function [state, convergence] = solvefi_J&G(state0, dt, bc, system, equation, pa
    fprintf('%13s%-26s%-36s\n', '', 'CNV (oil, water)', 'MB (oil, water)');
    
    %DON'T REALLY UNDERSTAND THIS PART
-   equation = @(state) equation(state0, state, dt, bc, system);
-   
+   %LITERALLY JUST MAKING IT SO THAT WE TYPE EQUATION INSTEAD @eqsAssemble
+  % ANY "SYSTEM" HAS TO GO gr 07/20
+   equation = @(state) equation(rock, state0, state, dt, bc,dz,p_grad,div,faceConcentrations); system);
+   flash=@(state.fluid) GI_flash(state.fluid,thermo,options);
    %%
    % We start with the Newton iterations
    
@@ -53,14 +55,34 @@ function [state, convergence] = solvefi_J&G(state0, dt, bc, system, equation, pa
       % 
       % At each Newton step, we start by solving the flash equations and update the liquid
       % saturation variable.
-      % 
-      [C, p] = deal(state.C, state.pressure);
-      nc = numel(p);
-      state.sL=state.So+state.Sg; %ADDED!!! jb 7/20
-      init_sL = state.sL; 
-      Cvec = cell2mat(C);
-      [cg, cl, cw, s, Cw] = flash_calculation(Cvec, p, system, init_sL);
-      state.sL = s(:, 2);
+      % %GET RID OF C
+      %PROBABLY WONT NEED THIS[C, p] = deal(state.C, state.pressure);
+[Sw,p]=deal(state.Sw,state.pressure);
+      %JUST REALIZED, ITHINK Sg NEEDS TO DEPEND ON Sw AND NOT VICE VERSA
+state.fluid.pressure=p;
+[success_flag,stability_flag,Xiv,Xil,Zgas_vap, Zgas_liq, vapor_frac,cubic_time]=flash(state.fluid);
+state.Xig=Xiv(1:3); %4 components. units=MOLig/MOLg
+state.Xio=Xil(1:3); %units=MOLio/MOLo
+state.Xwv=Xiv(4); %units=MOLwv/MOLw
+state.Xwl=Xil(4);
+state.V=vapor_frac;
+%CHANGED BELOW 7/19 JB
+%state.So=.25; THIS WILL BE SOLVED FOR
+%state.Sg=.30; THIS ALSO
+state.Sw=1-state.So-state.Sg;
+state.Zi=state.Xig.*state.V+state.Xio.*(1-state.V); 
+state.Eo=state.pressure/(Zgas_liq*R*state.fluid.temperature); 
+state.Eg=state.pressure/(Zgas_vap*R*state.fluid.temperature); 
+state.F=(state.Eo.*state.So+state.Eg.*state.Sg);
+%IM TIRED AND CONFUSED LOL, WE ARE GOING TO SOLVE FOR THESE DIFFERENTLY
+%THAN I CURRENTLY HAVE IT THOUGH PROBABLY. BUT THIS IS IN THE RIGHT
+%DIRECTION GR 07/20
+      %nc = numel(p);
+      %state.sL=state.So+state.Sg; %ADDED!!! jb 7/20
+      %init_sL = state.sL; 
+      %Cvec = cell2mat(C);
+      %[cg, cl, cw, s, Cw] = flash_calculation(Cvec, p, system, init_sL);
+      %state.sL = s(:, 2);
       
       %%
       % The residual equations for the whole system (pressure, total concentrations,
