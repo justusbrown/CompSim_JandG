@@ -8,12 +8,11 @@
 % The discretized residual equation are given by |equation| which is assembled in the
 % function |equationCompositional|. 
 %%
-function [state, convergence] = solvefi_JandG(system, rock,state0, dt, bc, dz,p_grad,div,faceConcentrations, equation,options)
+function [state, convergence] = solvefi_JandG(tstep, system, rock,state0, dt, bc, dz,p_grad,div,faceConcentrations, equation,options)
 %
    %opt = struct('verbose', false);
    %opt = merge_options(opt, varargin{:});
 
-   fluid = state.fluid;%changed to state, didn't see system anywhere else in our code
    
    meta = struct('converged'  , false                       , ...
                  'stopped'    , false                       , ...
@@ -26,12 +25,14 @@ function [state, convergence] = solvefi_JandG(system, rock,state0, dt, bc, dz,p_
    
    converged = false;
    state = state0;
+   fluid = state.fluid;
 
    fprintf('%13s%-26s%-36s\n', '', 'CNV (oil, water)', 'MB (oil, water)');
    
-
-   equation = @(state) equation(rock, state0, state, dt, bc,dz,p_grad,div,faceConcentrations); system);
-   flash=@(state.fluid) GI_flash(state.fluid,thermo,options);
+   thermo=addThermo();
+   thermo.EOS=@PREOS;
+   equation = @(state) equation(rock, state0, state, dt, bc,dz,p_grad,div,faceConcentrations);
+   flash=@(fluid) GI_flash(fluid,thermo,options);
    %%
    % We start with the Newton iterations
    
@@ -46,6 +47,9 @@ function [state, convergence] = solvefi_JandG(system, rock,state0, dt, bc, dz,p_
       % saturation variable.
       % %GET RID OF C
       %PROBABLY WONT NEED THIS[C, p] = deal(state.C, state.pressure);
+      
+%IF tstep=1 and Newton iter =1 then I wanna skip this.So..
+if tstep~=1 & meta.iteration~=0
 [Sw, p, F, Zi]=deal(state.Sw, state.pressure, state.F, state.Zi);
       %JUST REALIZED, ITHINK Sg NEEDS TO DEPEND ON Sw AND NOT VICE VERSA
 state.fluid.pressure=p; %Update the fluids pressure since its seperate from P 
@@ -60,7 +64,7 @@ state.V=vapor_frac;
 state.Eo=state.pressure/(Zgas_liq*R*state.fluid.temperature); 
 state.Eg=state.pressure/(Zgas_vap*R*state.fluid.temperature); 
 state.Ew=55.5; %THIS IS A PLACEHOLDER
-
+end
 
 %%
 %THIS SECTION NEEDS TO BE CHECKED TO SEE IF YOU AGREE

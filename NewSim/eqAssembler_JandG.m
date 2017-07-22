@@ -21,14 +21,11 @@
    Sw=state.Sw;
    Xig=state.Xig;
    Xio=state.Xio;
+   Xwv=state.Xwv;
+   Xwl=state.Xwl;
    Ew=state.Ew;
    So=state.So;
-   
-   %WHERE SHOULD THESE VALUES COME FROM, I KNOW IT IS COMPUTE WATER COMP IN
-   %BRAVO DOME FOR A GIVEN SET OF THEIR PRIMARY VARIABLES JB 7/21
-   cwL=state.cwL%NED TO THINK ABOUT ALL OF THESE WATER TERMS gr 07/20
-   cwV=state.cwV
-   Cw=state.Cw
+
    
    [p,F,Zi,Sw]=initVariablesADI(p,F,Zi,Sw); %DOES THIS MAKE Xi* ADI ALSO? I BELIEVE IT DOES
    
@@ -51,7 +48,7 @@
    
 [krL,krG]=quadraticRelPerm(So);
 bd=bc.dirichlet;
-[bc_krL, bc_krG] = quadraticRelperm(bd.So);
+[bc_krL, bc_krG] = quadraticRelPerm(bd.So);
 
 g  = norm(gravity);
 %dz is already known 
@@ -91,8 +88,8 @@ fluxC=cell(nComp,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
     end
 
     % Compute the residual of the mass conservation equation for water.
-    bc_val = bd.cwV.*bc_mobG + bd.cwL.*bc_mobL;
-    fluxW = faceConcentrations(upW, cwV.*mobG + cwG.*mobL, bc_val);%NEED TO ADD IN SETUPCONTROLS
+    bc_val = bd.Xwv.*bc_mobG + bd.Xwl.*bc_mobL;
+    fluxW = faceConcentrations(upW, Xwv.*mobG + Xwl.*mobL, bc_val);%NEED TO ADD IN SETUPCONTROLS
     eqs{nComp + 1} = (rock.pv/dt).*(Ew*Sw - Ew0*Sw0) + div(fluxW.*rock.T.*dpW);
     %DONE COMPUTING RESIDUAL FOR WATER
     %%STILL NEED Ew gr 07/20
