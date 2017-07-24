@@ -1,4 +1,7 @@
  %%
+ %MAIN FILE OF CompSim_JandG REPOSITORY
+ 
+ 
 %IMPORTANT NOTE GR 07/20:
 %BravoDome has everything for the solver formated ass Cell arrays using {}.
 %We might have to change the character types on these. Shouldn't be
@@ -6,13 +9,13 @@
 mrstModule add ad-fi 
 mrstModule add ad-core
 
-G = cartGrid([2, 2, 2]);
+G = cartGrid([10, 10, 10]);
 G = computeGeometry(G);
 % Disable gravity
 gravity off
 % Set up uniform permeability and constant porosity
 rock.perm = repmat(100*milli*darcy, [G.cells.num, 1]);
-rock.poro = [0.5, 0.1,0.3,0.4,0.8,0.7,0.2,0.3]';
+rock.poro = repmat(0.5, [G.cells.num,1]);
 rock.pv=poreVolume(G,rock);
 rock.T=computeTrans(G,rock);
 rock.G=G

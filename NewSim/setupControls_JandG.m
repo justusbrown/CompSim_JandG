@@ -41,7 +41,7 @@ bc.dirichlet.F=bc.dirichlet.Eo*bc.dirichlet.So+bc.dirichlet.Eg*bc.dirichlet.Sg;
 %WATERbc.dirichlet.Cw=Xiv(4)*vapor_frac+Xil(4)*(1-vapor_frac) %IM NOT SURE THIS IS ASSEMBLED CORRECTLY, BUT IM TRYING NOT TO FIXATE ON INDIVIDUAL LINES
 
 
-bound_cell_in=8;
+bound_cell_in=90;
 bc.in.influx_cells=bound_cell_in;
 [success_flag,stability_flag,bc.in.Xiv,bc.in.Xil,bc.in.vapor_frac,cubic_time]=GI_flash(influxFluid,thermo,options) %DONT SEEM TO USE ANYTHING FROM THIS FLASH TEST...WHY?
 for ic=1:3 %DOING WATER SEPERATELY
