@@ -45,10 +45,11 @@
    %cwL0=state0.cwL;
    %cwV0=state0.cwV;
    %Cw0=state0.Cw; %I DONT KNOW IF ALL OF THIS IS NECESSARY
-   
+
+   %added this function under the calling file
 [krL,krG]=quadraticRelPerm_JandG(So);
 bd=bc.dirichlet;
-[bc_krL, bc_krG] = quadraticRelPerm(bd.So);
+[bc_krL, bc_krG] = quadraticRelPerm_JandG(bd.So);
 
 g  = norm(gravity);
 %dz is already known 
