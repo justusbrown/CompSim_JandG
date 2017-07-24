@@ -1,10 +1,11 @@
-%%HERE STARTS EQUATION ASSEMBLING - THIS IS THE BEGINNING OF SETTING UP THE
+%%%HERE STARTS EQUATION ASSEMBLING - THIS IS THE BEGINNING OF SETTING UP THE
 %%EQUATIONS
    %THE MAIN VARIABLESARE P,F, Zi, Sw So MAKE ADI VARIABLES
    
    
-   function eqs=eqAssembler_JandG(rock, state0,state,dt,bc,dz,p_grad,div,faceConcentrations);
-   %NOT SURE IF ILL KEEP varagin gr 07/20
+   function eqs=eqAssembler_JandG( rock, state0,state,dt,bc,dz,p_grad,div,faceConcentrations);
+   %should nComp_C just be an input?
+   nComp_C=3; %jb 7/24
    
        opt = struct('Verbose',     mrstVerbose,...
                  'scaling',     [],...
@@ -46,7 +47,7 @@
    %cwV0=state0.cwV;
    %Cw0=state0.Cw; %I DONT KNOW IF ALL OF THIS IS NECESSARY
 
-   %added this function under the calling file
+   %added this function under the calling file jb 7/24
 [krL,krG]=quadraticRelPerm_JandG(So);
 bd=bc.dirichlet;
 [bc_krL, bc_krG] = quadraticRelPerm_JandG(bd.So);
