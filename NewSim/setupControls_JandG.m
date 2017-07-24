@@ -19,6 +19,8 @@ bc.dirichlet.fluid=outfluxFluid
 [success_flag,stability_flag,Xiv,Xil,Zgas_vap, Zgas_liq, vapor_frac,cubic_time]=GI_flash(bc.dirichlet.fluid,thermo,options)
 bc.dirichlet.Xig=Xiv(1:3);
 bc.dirichlet.Xio=Xil(1:3);
+bc.dirichlet.Xwv=Xiv(4);
+bc.dirichlet.Xwl=Xil(4);
 %SINCE THIS IS A BOUNDARY CONDITION, I GUESS IT CAN BE A SINGLE VALUE? JB
 %7/21
 bc.dirichlet.So=.25; 

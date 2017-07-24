@@ -26,6 +26,7 @@
    Xwl=state.Xwl;
    Ew=state.Ew;
    So=state.So;
+   V=state.V;
 
    
    [p,F,Zi,Sw]=initVariablesADI(p,F,Zi,Sw); %DOES THIS MAKE Xi* ADI ALSO? I BELIEVE IT DOES
@@ -85,15 +86,15 @@ fluxC=cell(nComp_C,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
        % The function |s.faceConcentrations| computes concentration on the faces given
        % cell concentrations, using upwind directions.
        %RESIDUAL FOR NON WATER COMPONENTS
-       bc_val = bd.Xig{ic}.*bc_mobG + bd.Xio{ic}.*bc_mobL; 
-       fluxC{ic} = faceConcentrations(upC{ic}, Xig{ic}.*mobG + Xio{ic}.*mobL, bc_val);
+       bc_val = bd.Xig(ic).*bc_mobG + bd.Xio(ic).*bc_mobL; 
+       fluxC{ic} = faceConcentrations(upC{ic}, Xig(ic).*mobG + Xio(ic).*mobL, bc_val);
        eqs{ic} = (rock.pv/dt).*(F*Zi(ic)-F0*Zi0(ic))+ div(fluxC{ic}.*rock.T.*dpC{ic});
     end
 
     % Compute the residual of the mass conservation equation for water.
     bc_val = bd.Xwv.*bc_mobG + bd.Xwl.*bc_mobL;
     fluxW = faceConcentrations(upW, Xwv.*mobG + Xwl.*mobL, bc_val);%NEED TO ADD IN SETUPCONTROLS
-    eqs{nComp + 1} = (rock.pv/dt).*(Ew*Sw - Ew0*Sw0) + div(fluxW.*rock.T.*dpW);
+    eqs{nComp_C + 1} = (rock.pv/dt).*(Ew*Sw - Ew0*Sw0) + div(fluxW.*rock.T.*dpW);
     %DONE COMPUTING RESIDUAL FOR WATER
     %%STILL NEED Ew gr 07/20
     %I GUESS WE DO NEED cw stuff gr 07/20
@@ -105,8 +106,8 @@ fluxC=cell(nComp_C,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
     %
     %First need to define things: avg. MW, global dpC and global upC
     %gr 07/20
-    avgMW=sum(fluid.mole_fraction(1:3).*fluid.component.MW(1:3));
-    dpC_total = s.p_grad(p) - g*(avgMW.*dz); 
+    avgMW=sum(fluid.mole_fraction(1:3)'.*MW(1:3));
+    dpC_total = p_grad(p) - g*(avgMW.*dz); 
     upC_total = (double(dpC_total)>=0);
 
     bc_val = bd.V.*bc_mobG + (1-bd.V).*bc_mobL; 
