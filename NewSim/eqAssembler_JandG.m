@@ -65,10 +65,11 @@ bc_mobG   = bc_krG./fluid.muG;
 %components because bravo-dome does, so might need change). Also, I am only
 %establishing everything as cell arrays becuase bravo dome does and i think
 %they might need to be that way for solvefi.. might change also
-dpC = cell(nComp_C, 1);
-upC = cell(nComp_C, 1);
+MW=vertcat(fluid.components.MW);
+dpC = cell(1,nComp_C);
+upC = cell(1,nComp_C);
 for ic = 1:nComp_C
-    dpC{ic} = s.p_grad(p) - g*(fluid.components.MW(ic).*dz); %STILL NEED TO SET GRAD STUFF UP IN SETUPSYSTEM AREA
+    dpC{ic} = p_grad(p) - g*(MW(ic).*dz); %STILL NEED TO SET GRAD STUFF UP IN SETUPSYSTEM AREA
     upC{ic} = (double(dpC{ic})>=0);
 end
     dpW = p_grad(p) - g*(fluid.components.MW(4).*dz); %COMPONENT 4 IS WATER< I PLAN ON MAKING A FUNCTION THAT REGISTERS WHICH COMPONENTS ARE WHICH SO WE CAN TYPE THEM IN BY NAME INSTEAD
