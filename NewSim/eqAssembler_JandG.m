@@ -24,6 +24,8 @@
    Xio=state.Xio;
    Xwv=state.Xwv;
    Xwl=state.Xwl;
+   Eo=state.Eo;
+   Eg=state.Eg;
    Ew=state.Ew;
    So=state.So;
    V=state.V;
@@ -111,23 +113,23 @@ fluxC=cell(nComp_C,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
     upC_total = (double(dpC_total)>=0);
 
     bc_val = bd.V.*bc_mobG + (1-bd.V).*bc_mobL; 
-    fluxT = faceConcentrations(upC_total, V*mobG + (1-V).*mobL, bc_val);
+    fluxT = faceConcentrations(upC_total, V.*mobG + (1-V).*mobL, bc_val);
        %CHANGED Xia to V an 1-V. dpC{ic} NEEDS THOUGHT HERE AND I need to
        %find out if faceConc can take in a single value for varagin 2
        %%THIS NEEDS THOUGHT gr 07/20
-    eqs{nComp+2}=(rock.pv/dt).*(F-F0)+div(fluxT.*rock.T.*dpC_total); %THE SECOND TERM IS SAME AS FOR INDIVIDUAL COMPONENTS. THIS MUST CHANGE
+    eqs{nComp_C+2}=(rock.pv/dt).*(F-F0)+div(fluxT.*rock.T.*dpC_total); %THE SECOND TERM IS SAME AS FOR INDIVIDUAL COMPONENTS. THIS MUST CHANGE
     %DONE COMPUTING GLOBAL FLOW EQ
     
     %COMPUTE THE SATURATION RESIDUAL EQUATION
-    eqs{nComp+3}=(F)*((1-V)/(Eo)+(V)/(Eg))+(Sw)-1;
+    eqs{nComp_C+3}=(F)*((1-V)/(Eo)+(V)/(Eg))+(Sw)-1;
     %DONE COMPUTING THE RESIDUAL FOR SATURATION
 
         
     %ADD INPUT FLUX
-    for ic = 1 : nComp
-       eqs{ic}(bc.influx_cells) = eqs{ic}(bc.influx_cells) - bc.C_influx{ic};
+    for ic = 1 : nComp_C
+       eqs{ic}(bc.in.influx_cells) = eqs{ic}(bc.in.influx_cells) - bc.in.C_influx(ic);
     end
-    eqs{nComp + 1}(bc.influx_cells) = eqs{nComp + 1}(bc.influx_cells) - bc.water_influx;
+    eqs{nComp_C + 1}(bc.in.influx_cells) = eqs{nComp_C + 1}(bc.in.influx_cells) - bc.in.water_influx;
     
    end
     %DONE ADDING INPUT FLUXES
