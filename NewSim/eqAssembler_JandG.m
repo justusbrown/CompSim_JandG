@@ -46,7 +46,7 @@
    %cwV0=state0.cwV;
    %Cw0=state0.Cw; %I DONT KNOW IF ALL OF THIS IS NECESSARY
    
-[krL,krG]=quadraticRelPerm(So);
+[krL,krG]=quadraticRelPerm_JandG(So);
 bd=bc.dirichlet;
 [bc_krL, bc_krG] = quadraticRelPerm(bd.So);
 
