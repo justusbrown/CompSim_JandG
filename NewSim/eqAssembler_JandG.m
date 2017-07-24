@@ -1,7 +1,7 @@
 %%%HERE STARTS EQUATION ASSEMBLING - THIS IS THE BEGINNING OF SETTING UP THE
 %%EQUATIONS
    %THE MAIN VARIABLESARE P,F, Zi, Sw So MAKE ADI VARIABLES
-   
+   %
    
    function eqs=eqAssembler_JandG( rock, state0,state,dt,bc,dz,p_grad,div,faceConcentrations);
    %should nComp_C just be an input?
@@ -72,15 +72,15 @@ for ic = 1:nComp_C
     dpC{ic} = p_grad(p) - g*(MW(ic).*dz); %STILL NEED TO SET GRAD STUFF UP IN SETUPSYSTEM AREA
     upC{ic} = (double(dpC{ic})>=0);
 end
-    dpW = p_grad(p) - g*(fluid.components.MW(4).*dz); %COMPONENT 4 IS WATER< I PLAN ON MAKING A FUNCTION THAT REGISTERS WHICH COMPONENTS ARE WHICH SO WE CAN TYPE THEM IN BY NAME INSTEAD
+    dpW = p_grad(p) - g*(MW(4).*dz); %COMPONENT 4 IS WATER< I PLAN ON MAKING A FUNCTION THAT REGISTERS WHICH COMPONENTS ARE WHICH SO WE CAN TYPE THEM IN BY NAME INSTEAD
     upW  = (double(dpW)>=0);
 
 %[success_flag,stability_flag,vapor_y,liquid_x,vapor_frac,cubic_time]=GI_flash(fluid,thermo,options); %I AM CONCERNED THAT THESE MIGHT NOT COME OUT AS ADI VARIABLES
 %I ALREADY KNOW THESE FOR THE INTITIAL FLUID SO I DONT REALLY WANT THIS, BUT IF IT STAYS< I NEED TO TRANSLATE THE TERMS
 
-fluxC=cell(nComp,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
+fluxC=cell(nComp_C,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
 
-    for ic = 1 : nComp
+    for ic = 1 : nComp_C
        %%
        % The function |s.faceConcentrations| computes concentration on the faces given
        % cell concentrations, using upwind directions.
