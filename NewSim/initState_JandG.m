@@ -14,9 +14,6 @@ state.Xio=Xil(1:3).*ones(numCells, 1); %units=MOLio/MOLo
 state.Xwv=Xiv(4).*ones(numCells, 1); %units=MOLwv/MOLw
 state.Xwl=Xil(4).*ones(numCells, 1);
 state.V=vapor_frac.*ones(numCells, 1);
-%THE SATURATION ARE MORE THAN LIKELY GOING TO BE SOME KIND OF DISTRIBUTION
-%DEPENDING ON THE GEOLOGICAL MODEL IN THE LONG RUN, BUT WE CAN KEEP THEM
-%CONSTANT FOR NOW JB 7/21
 state.So=.25.*ones(numCells, 1);
 state.Sg=.30.*ones(numCells, 1);
 state.Sw=1.*ones(numCells,1)-state.So-state.Sg;

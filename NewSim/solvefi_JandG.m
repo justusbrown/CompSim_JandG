@@ -51,7 +51,7 @@ function [state, convergence] = solvefi_JandG(tstep, system, rock,state0, dt, bc
 %IF tstep=1 and Newton iter =1 then I wanna skip this.So..
 if tstep~=1 & meta.iteration~=0
 [Sw, p, F, Zi]=deal(state.Sw, state.pressure, state.F, state.Zi);
-      %JUST REALIZED, ITHINK Sg NEEDS TO DEPEND ON Sw AND NOT VICE VERSA
+
 state.fluid.pressure=p; %Update the fluids pressure since its seperate from P 
 state.fluid.mole_fraction=Zi;%Update fluids mole fraction since its seperate from Zi
 [success_flag,stability_flag,Xiv,Xil,Zgas_vap, Zgas_liq, vapor_frac,cubic_time]=flash(state.fluid);
@@ -65,14 +65,6 @@ state.Eo=state.pressure/(Zgas_liq*R*state.fluid.temperature);
 state.Eg=state.pressure/(Zgas_vap*R*state.fluid.temperature); 
 state.Ew=55.5; %THIS IS A PLACEHOLDER
 end
-
-%%
-%THIS SECTION NEEDS TO BE CHECKED TO SEE IF YOU AGREE
-%THE LINE BENEATH THIS I THINK IS NOT NEEDED, SW IS A PRIMARY VARIABLE
-%WHICH IS SOLVED FOR IN THE NEWTON ITERATION, WE ONLY NEED THE INITIAL CONDITION TO GET US STARTED JB 7/21
-%state.Sw=1-state.So-state.Sg;
-
-%THESE NEED TO BE UPDATED THROUGH PVT INFO JB 7/21
 
 
 %%
@@ -94,13 +86,10 @@ end
       
       dx = SolveEqsADI(eqs, []);
       
-      %UPDATE STATE WILL CHANGE
-      
       %%
       % We update |state|. see below for equation
       %
       state      = updateState_JandG(state, dx, 3);
-      %STOPPED HERE
       %%
       % We compute the residual values by calling |getResiduals|.
       % This function detects oscillation and stagnation
