@@ -29,6 +29,7 @@ function [state, convergence] = solvefi_JandG(tstep, system, rock,state0, dt, bc
 
    fprintf('%13s%-26s%-36s\n', '', 'CNV (oil, water)', 'MB (oil, water)');
    
+   R=getR_JandG()
    thermo=addThermo();
    thermo.EOS=@PREOS;
    equation = @(state) equation(rock, state0, state, dt, bc,dz,p_grad,div,faceConcentrations);
@@ -47,14 +48,14 @@ function [state, convergence] = solvefi_JandG(tstep, system, rock,state0, dt, bc
       % saturation variable.
       % %GET RID OF C
       %PROBABLY WONT NEED THIS[C, p] = deal(state.C, state.pressure);
-      
+      %THIS IS GETTING SKIPPED
 %IF tstep=1 and Newton iter =1 then I wanna skip this.So..
-if tstep~=1 & meta.iteration~=0
+%if tstep~=1 & meta.iteration~=1 TEMP CHANGE TO SEE WHAT ELSE NEEDS FIXING
 [Sw, p, F, Zi]=deal(state.Sw, state.pressure, state.F, state.Zi);
 
 state.fluid.pressure=p; %Update the fluids pressure since its seperate from P 
 state.fluid.mole_fraction=Zi;%Update fluids mole fraction since its seperate from Zi
-[success_flag,stability_flag,Xiv,Xil,Zgas_vap, Zgas_liq, vapor_frac,cubic_time]=flash(state.fluid);
+[success_flag,stability_flag,Xiv,Xil,Zgas_vap, Zgas_liq, vapor_frac,cubic_time]=flash(fluid);
 
 state.Xig=Xiv(1:3);
 state.Xio=Xil(1:3); %units=MOLio/MOLo
@@ -64,7 +65,7 @@ state.V=vapor_frac;
 state.Eo=state.pressure/(Zgas_liq*R*state.fluid.temperature); 
 state.Eg=state.pressure/(Zgas_vap*R*state.fluid.temperature); 
 state.Ew=55.5; %THIS IS A PLACEHOLDER
-end
+%end
 
 
 %%
