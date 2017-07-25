@@ -6,21 +6,23 @@
 function state = updateState_JandG(state, dx, nComp);
 
    dp = dx{1};
+   dF=dx{2};
    for ic = 1 : nComp
-      dZi{ic} = dx{ic + 1};
+      dZi{ic} = dx{2+ic};
    end
-   dSw = dx{nComp + 2};
-   dF=dx{nComp+3};
+   dSw = dx{nComp + 3};
+   
     
    step = 1;
 
    state.pressure = state.pressure + step*dp;
+   state.F=state.F+step*dF;
    for ic = 1 : nComp
       state.Zi{ic} = max(0, state.Zi{ic} + step*dZi{ic});
       %NOT SURE WE NEED MAX HERE
    end
    state.Sw = state.Sw + step*dSw;
    %GOT RID OF min FUNCTION STUFF BUT MIGHT NEED TO GO BACK.
-   state.F=state.F+step*dF;
+ 
    
 end
