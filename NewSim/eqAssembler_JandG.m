@@ -19,6 +19,7 @@
    p=state.pressure;
    F=state.F;
    Zi=state.Zi;
+   %Zi=num2cell(Zi,1); %THIS IS JUST TO MAKE Zi a 1x3 cell array LIKE C in BravoDome
    Sw=state.Sw;
    Xig=state.Xig;
    Xio=state.Xio;
@@ -31,13 +32,15 @@
    V=state.V;
 
    
-   [p,F,Zi,Sw]=initVariablesADI(p,F,Zi,Sw); %DOES THIS MAKE Xi* ADI ALSO? I BELIEVE IT DOES
+   [p,F,Zi{:},Sw]=initVariablesADI(p,F,Zi{:},Sw); %DOES THIS MAKE Xi* ADI ALSO? I BELIEVE IT DOES
    
    %DOES ALL OF THIS NEED TO BE INCLUDED, COMMENTED OUT WHAT ISN'T USED IN
    %THIS SHEET. JB 7/21
    fluid0=state0.fluid;%NEEDS THOUGHT: %THIS ACCOUNTS FOR TEMPERATURE AND PRESSURE, SO I MAY BE BEING SLOPPY?REPETITIVE HERE
    F0=state0.F;%USED LATER
-   Zi0=state0.Zi%USED LATER
+   Zi0=state0.Zi;%USED LATER
+   %Zi0=num2cell(Zi0,1); %THIS IS JUST TO MAKE Zi a 1x3 cell array LIKE C in BravoDome
+
    Sw0=state0.Sw%USED LATER
    Ew0=state0.Ew;%USED LATER
    %p0=state0.pressure;
@@ -90,13 +93,13 @@ fluxC=cell(nComp_C,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
        %RESIDUAL FOR NON WATER COMPONENTS
        bc_val = bd.Xig(ic).*bc_mobG + bd.Xio(ic).*bc_mobL; 
        fluxC{ic} = faceConcentrations(upC{ic}, Xig(ic).*mobG + Xio(ic).*mobL, bc_val);
-       eqs{ic} = (rock.pv/dt).*(F*Zi(ic)-F0*Zi0(ic))+ div(fluxC{ic}.*rock.T.*dpC{ic});
+       eqs{ic} = (rock.pv/dt).*(F.*Zi{ic}-F0.*Zi0{ic})+ div(fluxC{ic}.*rock.T.*dpC{ic});
     end
 
     % Compute the residual of the mass conservation equation for water.
     bc_val = bd.Xwv.*bc_mobG + bd.Xwl.*bc_mobL;
     fluxW = faceConcentrations(upW, Xwv.*mobG + Xwl.*mobL, bc_val);%NEED TO ADD IN SETUPCONTROLS
-    eqs{nComp_C + 1} = (rock.pv/dt).*(Ew*Sw - Ew0*Sw0) + div(fluxW.*rock.T.*dpW);
+    eqs{nComp_C + 1} = (rock.pv/dt).*(Ew.*Sw - Ew0.*Sw0) + div(fluxW.*rock.T.*dpW);
     %DONE COMPUTING RESIDUAL FOR WATER
     %%STILL NEED Ew gr 07/20
     %I GUESS WE DO NEED cw stuff gr 07/20
