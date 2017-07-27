@@ -3,7 +3,7 @@ function [state, convergence] = solvefi_JandG(component, tstep, system, rock,sta
    %opt = struct('verbose', false);
    %opt = merge_options(opt, varargin{:});
 
-   
+   %
    meta = struct('converged'  , false                       , ...
                  'stopped'    , false                       , ...
                  'relax'      , system.nonlinear.relaxation , ...
@@ -46,22 +46,17 @@ if tstep==1 & meta.iteration==1
     F=state.F;
     Zi=state.Zi;
     Sw=state.Sw
-[state.p, state.F, state.Zi{:}, state.Sw]=initVariablesADI(state.p, state.F, state.Zi{:}, state.Sw);
+[p, F, Zi{:}, Sw]=initVariablesADI(state.p, state.F, state.Zi{:}, state.Sw);
+    state.p=p;
+    state.F=F;
+    state.Zi=Zi;
+    state.Sw=Sw;
 else
     %NEED TO REDFINE SOMETHINGS HERE IN UPDATE STAATE
     %update the fluid
-    %I THOUGHT THE .VAL THAT YOU ADDED SHOULD TAKE CARE OF STATE.ZI BEING
-    %CONSIDERED AN ADI OBJECT
-    %CAN'T FIGURE THIS OUT BUT PUT A COUPLE OF HOURS IN LOOKING OVER THIS
-    %PORTION, CELL2MAT WON'T WORK BECAUSE THE ARGUMENT CONTAINS AN OBJECT,
-    %ALSO COUNDN'T GET VERTCAT TO WORK, COULD DO A FORLOOP MAYBE? -JB 7/27
-    %for ji=1:3
-    %mole_fracs(ji)=state.Zi{ji}.val;
-    %end %jb -7/27
-    
-    
     mole_fracs=cell2mat(state.Zi.val);
-    for jk=1:rock.G.cells.num %I NEED YOU TO WALK ME THROUGH THIS NEXT PART
+    
+    for jk=1:rock.G.cells.num
     compW=1-sum(mole_fracs(jk,:));
     mole_fracs(jk,4)=compW;
     end
