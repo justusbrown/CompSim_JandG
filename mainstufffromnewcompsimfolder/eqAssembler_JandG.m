@@ -3,7 +3,7 @@
    %THE MAIN VARIABLESARE P,F, Zi, Sw So MAKE ADI VARIABLES
    %
    
-   function eqs=eqAssembler_JandG(component, rock, state0,state,dt,bc,dz,p_grad,div,faceConcentrations);
+   function eqs=eqAssembler_JandG(tstep, iteration, component, rock, state0,state,dt,bc,dz,p_grad,div,faceConcentrations);
    %should nComp_C just be an input?
    nComp_C=3; %jb 7/24
    
@@ -47,6 +47,7 @@
    %p=p'; F=F'; Sw=Sw'; Zi=Zi';
    
    %I am only explicitly defining things in finite differences or primaries
+  if tstep~=1 & meta.iteration~=1
    Ew=state.Ew
    %PRIME VARS
    p=state.p;
@@ -56,7 +57,14 @@
 
 [p, F, Zi{:}, Sw]=initVariablesADI(state.p, state.F, state.Zi{:}, state.Sw);
    
-
+  else
+   Ew=state.Ew;
+   %PRIME VARS
+   p=state.p;
+   F=state.F;
+   Zi=state.Zi;
+   Sw=state.Sw
+  
 
    %DOES ALL OF THIS NEED TO BE INCLUDED, COMMENTED OUT WHAT ISN'T USED IN
    %THIS SHEET. JB 7/21

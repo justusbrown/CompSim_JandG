@@ -20,7 +20,7 @@ function [state, convergence] = solvefi_JandG(component, tstep, system, rock,sta
    
    thermo=addThermo();
    thermo.EOS=@PREOS;
-   equation = @(state) equation(component, rock, state0, state, dt, bc,dz,p_grad,div,faceConcentrations);
+   equation = @(state) equation(tstep, meta.iteration, component, rock, state0, state, dt, bc,dz,p_grad,div,faceConcentrations);
    flash=@(fluid) GI_flash(fluid,thermo,options);
    totalFluid=state.totalFluid;
    R=getR_JandG();
@@ -42,10 +42,19 @@ function [state, convergence] = solvefi_JandG(component, tstep, system, rock,sta
 %IF tstep=1 and Newton iter =1 then I wanna skip this.So..
 if tstep==1 & meta.iteration==1
     state=state0
+    p=state.p;
+    F=state.F;
+    Zi=state.Zi;
+    Sw=state.Sw
+[p, F, Zi{:}, Sw]=initVariablesADI(state.p, state.F, state.Zi{:}, state.Sw);
+    state.p=p;
+    state.F=F;
+    state.Zi=Zi;
+    state.Sw=Sw;
 else
     %NEED TO REDFINE SOMETHINGS HERE IN UPDATE STAATE
     %update the fluid
-    mole_fracs=cell2mat(state.Zi);
+    mole_fracs=cell2mat(state.Zi.val);
     for jk=1:rock.G.cells.num
     compW=1-sum(mole_fracs(jk,:));
     mole_fracs(jk,4)=compW;
