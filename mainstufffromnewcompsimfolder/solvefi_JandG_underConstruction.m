@@ -23,6 +23,7 @@ function [state, convergence] = solvefi_JandG(component, tstep, system, rock,sta
    equation = @(state) equation(component, rock, state0, state, dt, bc,dz,p_grad,div,faceConcentrations);
    flash=@(fluid) GI_flash(fluid,thermo,options);
    totalFluid=state.totalFluid;
+   R=getR_JandG();
       %%
    % We start with the Newton iterations
    
@@ -43,9 +44,78 @@ if tstep==1 & meta.iteration==1
     state=state0
 else
     %NEED TO REDFINE SOMETHINGS HERE IN UPDATE STAATE
+    %update the fluid
+    mole_fracs=cell2mat(state.Zi);
+    for jk=1:rock.G.cells.num
+    compW=1-sum(mole_fracs(jk,:));
+    mole_fracs(jk,4)=compW;
+    end
+    
+    for ji=1:rock.G.cells.num
+        totalFluid{ji}.pressure=state.p(ji);
+        totalFluid{ji}.mole_fraction=mole_fracs(ji,:);
+    end
+    
+    Xig=[];  state.Xig=[];  %4 components. units=MOLig/MOLg
+    Xio=[];  state.Xio=[];%units=MOLio/MOLo
+    Xwv=[];  state.Xwv=[];%units=MOLwv/MOLw
+    Xwl=[]; state.Xwl=[];
+    V=[]; state.V=[];
+    Eo=[];  state.Eo=[];%ALREADY Added to each cell
+    Eg=[]; state.Eg=[];
+    Ew=[];  state.Ew=[];
+    Sg=[]; state.Sg=[];
+    So=[]; state.So=[];
+
     for j=1:rock.G.cells.num;
     [success_flag,stability_flag,Xiv,Xil,Zgas_vap, Zgas_liq, vapor_frac,cubic_time]=flash(totalFluid{j});
     
+    totalFluid{j}.Xig=Xiv(1:3); %4 components. units=MOLig/MOLg
+    Xig=[Xig;totalFluid{j}.Xig];
+    state.Xig=Xig;
+    state.Xig=num2cell(state.Xig,1);
+
+    totalFluid{j}.Xio=Xil(1:3); %units=MOLio/MOLo
+    Xio=[Xio;totalFluid{j}.Xio];
+    state.Xio=Xio;
+    state.Xio=num2cell(state.Xio,1);
+
+    totalFluid{j}.Xwv=Xiv(4); %units=MOLwv/MOLw
+    Xwv=[Xwv;totalFluid{j}.Xwv];
+    state.Xwv=Xwv;
+
+    totalFluid{j}.Xwl=Xil(4);
+    Xwl=[Xwl;totalFluid{j}.Xwl];
+    state.Xwl=Xwl;
+
+    totalFluid{j}.V=vapor_frac;
+    V=[V;totalFluid{j}.V];
+    state.V=V;
+    
+    totalFluid{j}.Eo=totalFluid{j}.pressure/(Zgas_liq*R*totalFluid{j}.temperature); %ALREADY Added to each cell
+    Eo=[Eo;totalFluid{j}.Eo];
+    state.Eo=Eo;
+    
+    totalFluid{j}.Eg=totalFluid{j}.pressure/(Zgas_vap*R*totalFluid{j}.temperature); %ALREADY Added to each cell
+    Eg=[Eg;totalFluid{j}.Eg];
+    state.Eg=Eg;
+    
+    totalFluid{j}.Ew=55.5; 
+    Ew=[Ew;totalFluid{j}.Ew];
+    state.Ew=Ew;
+    
+    totalFluid{j}.Sg=state.V(j)*state.F(j)/state.Eg(j);
+    Sg=[Sg;totalFluid{j}.Sg];
+    state.Sg=Sg;
+    
+    totalFluid{j}.So=1-totalFluid{j}.Sg-state.Sw(j);
+    So=[So;totalFluid{j}.So];
+    state.So=So;
+    state.So(j)=totalFluid{j}.So;
+    
+    end
+    state.totalFluid=totalFluid;
+    %{
     totalFluid{i}.Xig=Xiv(1:3); %4 components. units=MOLig/MOLg
     totalFluid{i}.Xio=Xil(1:3); %units=MOLio/MOLo
     totalFluid{i}.Xwv=Xiv(4); %units=MOLwv/MOLw
@@ -55,8 +125,7 @@ else
     totalFluid{i}.Eg=totalFluid{i}.pressure/(Zgas_vap*R*totalFluid{i}.fluid.temperature); %ALREADY Added to each cell
     totalFluid{i}.Ew=55.5; 
 %THIS IS EVERYTHING NOT BEING CHANGED BY NEWTON SOLVER
-
-    end
+%}
 end
 
       %%

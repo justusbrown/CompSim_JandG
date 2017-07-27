@@ -38,23 +38,32 @@
    muG=1e-5;
    p_ref = 1*atm;       % Reference pressure
    
+   %combined=[fluid(1:rock.G.cells.num)];
    
-   [Xig,Xio,Xwv,Xwl,Eo,Eg,Ew,So,V]=variableCall_JandG(rock,state);
-   Xig=Xig',Xio=Xio',Xwv=Xwv',Xwl=Xwl',Eo=Eo',Eg=Eg',Ew=Ew',So=So',V=V';
+   %[Xig,Xio,Xwv,Xwl,Eo,Eg,Ew,So,V]=variableCall_JandG(rock,state);
+   %Xig=Xig';Xio=Xio';Xwv=Xwv';Xwl=Xwl';Eo=Eo';Eg=Eg';Ew=Ew';So=So';V=V';
    
-   [p,F,Sw,Zi]=primeVars_JandG(rock, state);
-   p=p', F=F', Sw=Sw', Zi=Zi';
+   %[p,F,Sw,Zi]=primeVars_JandG(rock, state);
+   %p=p'; F=F'; Sw=Sw'; Zi=Zi';
+   
+   %I am only explicitly defining things in finite differences or primaries
+   Ew=state.Ew
+   %PRIME VARS
+   p=state.p;
+   F=state.F;
+   Zi=state.Zi;
+   Sw=state.Sw
+
+[p, F, Zi{:}, Sw]=initVariablesADI(state.p, state.F, state.Zi{:}, state.Sw);
    
 
-[p,F,Zi{:},Sw]=initVariablesADI(p, F, Zi{:}, Sw);
-   
+
    %DOES ALL OF THIS NEED TO BE INCLUDED, COMMENTED OUT WHAT ISN'T USED IN
    %THIS SHEET. JB 7/21
    %fluid0=state0.fluid;%NEEDS THOUGHT: %THIS ACCOUNTS FOR TEMPERATURE AND PRESSURE, SO I MAY BE BEING SLOPPY?REPETITIVE HERE
    F0=state0.F;%USED LATER
    Zi0=state0.Zi;%USED LATER
    %Zi0=num2cell(Zi0,1); %THIS IS JUST TO MAKE Zi a 1x3 cell array LIKE C in BravoDome
-
    Sw0=state0.Sw%USED LATER
    Ew0=state0.Ew;%USED LATER
    %p0=state0.pressure;
@@ -68,7 +77,7 @@
    %Cw0=state0.Cw; %I DONT KNOW IF ALL OF THIS IS NECESSARY
 
    %added this function under the calling file jb 7/24
-[krL,krG]=quadraticRelPerm_JandG(So);
+[krL,krG]=quadraticRelPerm_JandG(state.So);
 bd=bc.dirichlet;
 [bc_krL, bc_krG] = quadraticRelPerm_JandG(bd.So);
 
@@ -92,6 +101,7 @@ for ic = 1:nComp_C
     dpC{ic} = p_grad(p) - g*(MW(ic).*dz); 
     upC{ic} = (double(dpC{ic})>=0);
 end
+    dpC=dpC'; upC=upC';
     dpW = p_grad(p) - g*(MW(4).*dz); %COMPONENT 4 IS WATER< I PLAN ON MAKING A FUNCTION THAT REGISTERS WHICH COMPONENTS ARE WHICH SO WE CAN TYPE THEM IN BY NAME INSTEAD
     upW  = (double(dpW)>=0);
 
@@ -106,13 +116,13 @@ fluxC=cell(nComp_C,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
        % cell concentrations, using upwind directions.
        %RESIDUAL FOR NON WATER COMPONENTS
        bc_val = bd.Xig(ic).*bc_mobG + bd.Xio(ic).*bc_mobL; 
-       fluxC{ic} = faceConcentrations(upC{ic}, cell2mat(Xig{1}(ic)).*mobG + cell2mat(Xio{1}(ic)).*mobL, bc_val); %THESE Xi VALUES ARE FOR CELL 1 AND NEED TO BE FIXED
+       fluxC{ic} = faceConcentrations(upC{ic}, state.Xig{ic}.*mobG + state.Xio{ic}.*mobL, bc_val); %THESE Xi VALUES ARE FOR CELL 1 AND NEED TO BE FIXED
        eqs{ic} = (rock.pv/dt).*(F.*Zi{ic}-F0.*Zi0{ic})+ div(fluxC{ic}.*rock.T.*dpC{ic});
     end
 
     % Compute the residual of the mass conservation equation for water.
     bc_val = bd.Xwv.*bc_mobG + bd.Xwl.*bc_mobL;
-    fluxW = faceConcentrations(upW, Xwv.*mobG + Xwl.*mobL, bc_val);%NEED TO ADD IN SETUPCONTROLS
+    fluxW = faceConcentrations(upW, state.Xwv.*mobG + state.Xwl.*mobL, bc_val);%NEED TO ADD IN SETUPCONTROLS
     eqs{nComp_C + 1} = (rock.pv/dt).*(Ew.*Sw - Ew0.*Sw0) + div(fluxW.*rock.T.*dpW);
     %DONE COMPUTING RESIDUAL FOR WATER
     %%STILL NEED Ew gr 07/20
@@ -125,12 +135,13 @@ fluxC=cell(nComp_C,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
     %
     %First need to define things: avg. MW, global dpC and global upC
     %gr 07/20
-    avgMW=sum(fluid.mole_fraction(1:3)'.*MW(1:3));
-    dpC_total = p_grad(p) - g*(avgMW.*dz); 
+    %avgMW=sum(fluid.mole_fraction(1:3)'.*MW(1:3));
+    %avgMW=getAvgMW(components, Zi);
+    dpC_total = p_grad(p) %- g*(avgMW.*dz); 
     upC_total = (double(dpC_total)>=0);
 
     bc_val = bd.V.*bc_mobG + (1-bd.V).*bc_mobL; 
-    fluxT = faceConcentrations(upC_total, V.*mobG + (1-V).*mobL, bc_val);
+    fluxT = faceConcentrations(upC_total, state.V.*mobG + (1-state.V).*mobL, bc_val);
        %CHANGED Xia to V an 1-V. dpC{ic} NEEDS THOUGHT HERE AND I need to
        %find out if faceConc can take in a single value for varagin 2
        %%THIS NEEDS THOUGHT gr 07/20
@@ -138,7 +149,7 @@ fluxC=cell(nComp_C,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
     %DONE COMPUTING GLOBAL FLOW EQ
     
     %COMPUTE THE SATURATION RESIDUAL EQUATION
-    eqs{nComp_C+3}=(F)*((1-V)/(Eo)+(V)/(Eg))+(Sw)-1;
+    eqs{nComp_C+3}=(F)*((1-state.V)/(state.Eo)+(state.V)/(state.Eg))+(Sw)-1;
     %DONE COMPUTING THE RESIDUAL FOR SATURATION
 
         
@@ -150,7 +161,9 @@ fluxC=cell(nComp_C,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
     
    end
     %DONE ADDING INPUT FLUXES
+   %NEED TO ADD INPUT FLUXES FOR TOTAL FLOW!!!!!
    
+   %IN GENERAL, NEED TO MAKE SURE TOTAL FLOW IS CORRECT
    
 
 

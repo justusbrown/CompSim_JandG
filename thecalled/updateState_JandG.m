@@ -15,7 +15,7 @@ function state = updateState_JandG(state, dx, nComp);
     
    step = 1;
 
-   state.pressure = state.pressure + step*dp;
+   state.p = state.p + step*dp;
    state.F=state.F+step*dF;
    for ic = 1 : nComp
       state.Zi{ic} = max(0, state.Zi{ic} + step*dZi{ic});
