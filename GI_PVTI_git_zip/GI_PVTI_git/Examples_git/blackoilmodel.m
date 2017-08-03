@@ -1,8 +1,7 @@
 % test case
 % liquid-vapor phase equilibia calculation
 % Define the components and load pure physsical properties
-z=[2,4,3,1];
-z=mynormalize(z);
+z=[.25,.10,.5,.15];
 [component, comp_flag] = addComponents({'CO2','CH4','C10H22','H2O'});
 % Define the thermodynamic models
 T= 360; % [K]  temperature
