@@ -54,7 +54,17 @@ if tstep==1 & meta.iteration==1
 else
     %NEED TO REDFINE SOMETHINGS HERE IN UPDATE STAATE
     %update the fluid
-    mole_fracs=cell2mat(state.Zi.val);
+    %mole_fracs=cell2mat(state.Zi.val);
+    Zi=state.Zi;
+    F=state.F;
+    p=state.p;
+    Sw=state.Sw;
+    
+    mole_fracs1=Zi{1}.val; %state.Zi is updated here, Zi is not
+    mole_fracs2=Zi{2}.val;
+    mole_fracs3=Zi{3}.val;
+    mole_fracs=[mole_fracs1, mole_fracs2, mole_fracs3];
+
     for jk=1:rock.G.cells.num
     compW=1-sum(mole_fracs(jk,:));
     mole_fracs(jk,4)=compW;
