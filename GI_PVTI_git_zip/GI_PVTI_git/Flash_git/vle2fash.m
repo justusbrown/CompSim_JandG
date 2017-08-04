@@ -6,7 +6,7 @@ function [success_flag,vapor_y,liquid_x,vapor_frac, Zgas_vap, Zgas_liq, cubic_ti
     %Initial estimate for k-values using an empirical equation
     cubic_time = 0;
     ki = wilsonCorrelation(mixture);
-    composition = mixture.mole_fraction;
+    composition = mixture.Zi;
     success_flag =1;
 %-------------------------------------------------------------
     [ki_max, max_index] = max(ki);

@@ -3,7 +3,7 @@ function phase_flag = phase_Identify(mixture)
 
 
 critical_temp = [mixture.components.Tc]; %[K]
-z = mixture.mole_fraction;
+z = mixture.Zi;
 T = mixture.temperature;
 Tc = z*critical_temp';
 if T<Tc

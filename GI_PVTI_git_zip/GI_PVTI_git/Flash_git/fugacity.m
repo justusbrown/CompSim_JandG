@@ -7,13 +7,13 @@ eosf = thermo.EOS;
 %------------------------------------
 %liquid fugacity
 thermo.phase=1;
-mixture.mole_fraction = liquid_x;
+mixture.Zi = liquid_x;
 [liq_fug_coef,success_flag_l, Zgas_liq]=eosf(mixture, thermo);
 
 %---------------------------------------
 %vapor fugacity
 thermo.phase=2;
-mixture.mole_fraction = vapor_y;
+mixture.Zi = vapor_y;
 [vap_fug_coef,success_flag_g,Zgas_vap]=eosf(mixture, thermo);
 %--------------------------------------
 if success_flag_l ==0 || success_flag_g ==0

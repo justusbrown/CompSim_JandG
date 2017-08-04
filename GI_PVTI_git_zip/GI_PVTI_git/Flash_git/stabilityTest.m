@@ -21,7 +21,7 @@ liquidthermo = thermo;
 liquidthermo.phase = 1;
 
 % extract the total composition and pressure
-composition = mixture.mole_fraction;
+composition = mixture.Zi;
 p = mixture.pressure;
 
 % --------------------------- FIRST TEST ----------------------------------
@@ -46,7 +46,7 @@ while (conv_error>convergence_eps) && (triv_error>trivial_eps) && (j<max_itr)
     yi = Yi/SV;
 
     % calculate the fugacity of the vapor-like phase using the thermo structure
-    gasmixture.mole_fraction = yi;
+    gasmixture.Zi = yi;
     [fug_coef,Zgas_vap,Zgas_liq]=eosf(gasmixture, gasthermo);
     gasfug = fug_coef.*yi*p; %[Pa]
 
@@ -90,7 +90,7 @@ while (conv_error>convergence_eps) && (triv_error>trivial_eps) && (j<max_itr)
     xi = Xi/SL;
 
     % calculate the fugacity of the liquid-like phase using the thermo structure
-    liquidmixture.mole_fraction = xi;
+    liquidmixture.Zi = xi;
     [fug_coef,Zgas_vap,Zgas_liq]=eosf(liquidmixture, liquidthermo);
     liquidfug = fug_coef.*xi*p; %[Pa]
 
