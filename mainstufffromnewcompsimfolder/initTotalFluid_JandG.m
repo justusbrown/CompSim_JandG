@@ -1,14 +1,15 @@
 
-function [state0]=initTotalFluid_JandG(rock,component,Temp,pressure, options,thermo);
+function [state0]=initTotalFluid_JandG(rock,components,Temp,pressure, options,thermo);
 
 numCells=rock.G.cells.num;
 R = getR_JandG();
 totalFluid=cell(numCells,1);
 
-Xig=[]; %4 components. units=MOLig/MOLg
+Xig=[]; %4 componentss. units=MOLig/MOLg
 Xio=[]; %units=MOLio/MOLo
-Xwv=[]; %units=MOLwv/MOLw
-Xwl=[];
+Cw=[];
+cwg=[];%Xwv=[]; %units=MOLwv/MOLw 
+cwl=[];%Xwl=[];
 V=[];
 So=[];
 Sg=[];
@@ -28,21 +29,22 @@ p_ref = 1*atm;       % Reference pressure
 
 
 for i=1:numCells
-    totalFluid{i}=addMixture(component, Temp, pressure);
+    totalFluid{i}=addMixture(components, Temp, pressure);
     
     
 [success_flag,stability_flag,Xiv,Xil,Zgas_vap,Zgas_liq,vapor_frac,cubic_time]=GI_flash(totalFluid{i},thermo,options);
 
-totalFluid{i}.Xig=Xiv(1:3); %4 components. units=MOLig/MOLg
+totalFluid{i}.Xig=Xiv; %4 components. units=MOLig/MOLg
 Xig=[Xig;totalFluid{i}.Xig];
 state.Xig=Xig;
 state.Xig=num2cell(state.Xig,1);
 
-totalFluid{i}.Xio=Xil(1:3); %units=MOLio/MOLo
+totalFluid{i}.Xio=Xil; %units=MOLio/MOLo
 Xio=[Xio;totalFluid{i}.Xio];
 state.Xio=Xio;
 state.Xio=num2cell(state.Xio,1);
 
+%{
 totalFluid{i}.Xwv=Xiv(4); %units=MOLwv/MOLw
 Xwv=[Xwv;totalFluid{i}.Xwv];
 state.Xwv=Xwv;
@@ -50,7 +52,7 @@ state.Xwv=Xwv;
 totalFluid{i}.Xwl=Xil(4);
 Xwl=[Xwl;totalFluid{i}.Xwl];
 state.Xwl=Xwl;
-
+%}
 totalFluid{i}.V=vapor_frac;
 V=[V;totalFluid{i}.V];
 state.V=V;
