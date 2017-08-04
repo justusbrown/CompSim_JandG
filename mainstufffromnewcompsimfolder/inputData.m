@@ -2,10 +2,13 @@
 %This is where the user where input their data to run our simulator.
 %
 %USER INPUTS
+%
+%***All of the objects/data that are setup in this function call are listed in
+%detail at the end of the function
 
 %FUNCTION inputData
 
-function [G,rock,options,thermo,influxFluid,outfluxFluid,initialFluid]=inputData()
+function [G,rock,options,thermo,influxFluid,outfluxFluid,initialFluid, influx_rate, system]=inputData()
 
 
 %
@@ -46,9 +49,10 @@ outflux_p=8e6;
 %Enter the influx  in m^3/s
 influx_rate = 1000/day  
 %Enter the temperature in Kelvin
-Temp=30+273.15;
+Temp=90+273.15;
 thermo=addThermo();
 thermo.EOS=@PREOS;
+thermo.vp_water=vaporPressure(Temp);
 
 %%
 %%%ENTER THE COMPONENENTS AND MOLE FRACTIONS FOR INFLUX, OUTFLUX, AND
@@ -57,24 +61,47 @@ thermo.EOS=@PREOS;
 %%tables will be used
 %
 %Enter all fluid components 
-[components, comp_flag]=addComponents({'CO2','CH4','C10H22','H2O'});
+[components, comp_flag]=addComponents({'CH4','C2H6','C3H8','C10H22'});
 %Initialize the influx, outflux, and initial fluids
-influxFluid=addMixture(component,Temp,influx_p);
-outfluxFluid=addMixture(component,Temp,outflux_p);
-initialFluid=addMixture(component,Temp,outflux_p);
+influxFluid=addMixture(components,Temp,influx_p);
+outfluxFluid=addMixture(components,Temp,outflux_p);
+initialFluid=addMixture(components,Temp,outflux_p);
 %Enter the Influx Fluid's mole fraction
-influxFluid.mole_fraction=[0.25,0.25,0.25,0.25];
+influxFluid.Zi=[1,0,0,0];
 %Enter the Outflux Fluid's mole fraction
-outfluxFluid.mole_fraction=[0.25,0.25,0.25,0.25];
+outfluxFluid.Zi=[0.25,0.25,0.25,0.25];
 %Enter the Initial Fluid's mole fraction
-initialFluid.mole_fraction=[0.25,0.25,0.25,0.25];
+initialFluid.Zi=[0.25,0.25,0.25,0.25];
 %%NOTE THAT THE MOLE FRACTION ENTERED CORRESPONDS TO THE ORDER OF
 %%COMPONENTS ENTERED
+
+%%
+%GROUP EVERYTHING INTO OVERARCHING SYSTEM
+system.R=getR_JandG();
+system.Temp=Temp;
+system.vp=thermo.vp_water;
+system.fluid=[influxFluid,outfluxFluid,initialFluid];
+system.components=components;
+system.cl=4.4e-5/atm; % Compressibility
+system.p_ref = 1*atm;      % Reference pressure
+influxFluid.call=1; %These are setup to avoid confusion when referenceing the fluid vector
+outfluxFluid.call=2;
+initialFluid.call=3;
+system.nComp=numel(components);
+%water info
+mmH  = 1.00794*gram;  % molar mass of Hydrogen
+mmO  = 15.9994*gram;  % molar mass of Oxygen
+mmW = 2*mmH + mmO;  % molar mass of H20
+litre = 1e-3*meter^3;
+rho = 1*kilogram/litre;
+system.mv = mmW/rho; %molar volume of water
+
+
 end
 
 
 %%
-%HERE IS A LIST OF EVERYTHING THAT IS ESTABLISHED THROUGH THIS FUNCTION
+%***HERE IS A LIST OF EVERYTHING THAT IS ESTABLISHED THROUGH THIS FUNCTION
 
 %%
 %{
@@ -131,14 +158,14 @@ Thermo  struct with fields:
          mixingrule: 1
                 EOS: @PREOS
               phase: 1
-    fugacity_switch: 1
+    fugacity_switch: 1 %%%%vp_water needs to be added here
 %}
 
 %{
 influxFluid, outfluxFluid, initialFluid struct with fields: 
               bip: [1×1 struct]
        components: [1×4 struct]
-    mole_fraction: [0.2000 0.4000 0.3000 0.1000]
+    Zi: [0.2000 0.4000 0.3000 0.1000]
          pressure: 10000000
       temperature: 303.1500
 

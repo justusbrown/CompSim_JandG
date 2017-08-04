@@ -9,58 +9,19 @@
 mrstModule add ad-fi 
 mrstModule add ad-core
 
-G = cartGrid([6, 6, 6]);
-G = computeGeometry(G);
+%%
+%See function inputData() to change user inputs
+[G,rock,options,thermo,influxFluid,outfluxFluid,initialFluid, influx_rate, system]=inputData()
+
 % Disable gravity
 gravity off
-% Set up uniform permeability and constant porosity
-rock.perm = repmat(100*milli*darcy, [G.cells.num, 1]);
-rock.poro = repmat(0.5, [G.cells.num,1]);
-rock.pv=poreVolume(G,rock);
-rock.T=computeTrans(G,rock);
-rock.G=G
-
-%%
-%SETUP THE CONTROLS
-%OPTIONS FOR PVT
-options.convergence_eps = 1e-12;   %convergence tolerance for fugacity
-options.trivial_eps = 1e-3;     %trivial shift for bisection algorithm
-options.RRiteration = 200;   %maximum number of Rachford Rice iteration using Newton's method
-options.max_outer_loop = 1000;   %max number of fugacity updates
-
-influx_p=10e6;
-outflux_p=8e6;
-
-influx_rate = 1000/day  % in m^3/s
-
-
-Temp = 30 + 273.15;  % Temperaclearture (in Kelvin)
-thermo=addThermo();
-thermo.EOS=@PREOS;
-
-
-influx_C  = [2,4,3,1];
-influx_C  =mynormalize(influx_C);
-outflux_C = [2,4,3,1];
-outflux_C=mynormalize(outflux_C);
-C_initial = [2,4,3,1]; 
-C_initial=mynormalize(C_initial);
-[component, comp_flag] = addComponents({'CO2','CH4','C10H22','H2O'})
-
-influxFluid=addMixture(component,Temp,influx_p);
-influxFluid.mole_fraction=influx_C;
-outfluxFluid=addMixture(component,Temp,outflux_p);
-outfluxFluid.mole_fraction=outflux_C;
-initialFluid=addMixture(component,Temp,outflux_p);
-initialFluid.mole_fraction=C_initial;
-
 
 %clf
 %plotCellData(G,G.cells.indexMap), view(30,50), xlabel('x'), ylabel('y'),zlabel('z'), colorbar
 
 %%
 %THIS IS WHERE setupControls WAS gr-07/19
-bc=setupControls_JandG(rock,outfluxFluid,influxFluid,influx_rate,thermo,options);
+bc=setupControls_JandG(rock,outfluxFluid,influxFluid,influx_rate,thermo,options, system);
 
 %%
 %SETUP SYSTEM
@@ -157,7 +118,7 @@ bc=setupControls_JandG(rock,outfluxFluid,influxFluid,influx_rate,thermo,options)
    %gr 07/20
    %STUPID QUESTION, SHOULD WE BE CALLING initialFluid in the
    %initState_JandG sheet as well: [state0]=initState_JandG(rock,fluid,options,thermo);
-   [state0]=initTotalFluid_JandG(rock,component, Temp, outflux_p, options, thermo);
+   [state0]=initTotalFluid_JandG(rock,system.components, system.Temp, outfluxFluid.pressure, options, thermo);
    %MIGHT WANNA GET TOTALFLUID HERE AS WELL 
    %AND THE STATE IS INITIALIZED AS state0
 
@@ -177,7 +138,7 @@ nComp_C=3; %# OF NON WATER COMPONENTS
 
 for tstep = 1 : numel(steps)
    % Call non-linear solver perlAddLink(solvefi)
-  [state, conv] = solvefi_JandG_underConstruction(component, tstep, system, rock, state0, dt, bc, dz, p_grad, div, faceConcentrations, @eqAssembler_JandG, options);
+  [state, conv] = solvefi_JandG_underConstruction(components, tstep, system, rock, state0, dt, bc, dz, p_grad, div, faceConcentrations, @eqAssembler_JandG, options);
   %SOLVEFI IS NOT GONNA CONTAIN SYSTEM OR PARAM. IT WILL CONTAIN OTHER
   %THINGS
 
