@@ -32,8 +32,11 @@ bc.dirichlet.Zi=bc.dirichlet.Xig.*bc.dirichlet.V+bc.dirichlet.Xio.*(1-bc.dirichl
 bc.dirichlet.Eo=bc.dirichlet.pressure/(Zgas_liq*R*bc.dirichlet.fluid.temperature); 
 bc.dirichlet.Eg=bc.dirichlet.pressure/(Zgas_vap*R*bc.dirichlet.fluid.temperature); 
 bc.dirichlet.F=bc.dirichlet.Eo*bc.dirichlet.So+bc.dirichlet.Eg*bc.dirichlet.Sg;
+bc.dirichlet.Ew=55.5;
 
+%{
 [bc.dirichlet.Cw,bc.dirichlet.cwg,bc.dirichlet.cwl]=computeWaterComp_JandG(bc.dirichlet.pressure,bc.dirichlet.Zi,bc.dirichlet.Xio,bc.dirichlet.V,system);
+%}
 %SOMETHING IS MAJORLY WRONG WITH THESE WATER NUMBERS!!!
 
 %bc.dirichlet.Ew=? DONT KNOW IF NEEDED HERE BUT DO NEED FOR INITIAL STATE

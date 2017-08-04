@@ -138,7 +138,7 @@ nComp_C=3; %# OF NON WATER COMPONENTS
 
 for tstep = 1 : numel(steps)
    % Call non-linear solver perlAddLink(solvefi)
-  [state, conv] = solvefi_JandG_underConstruction(components, tstep, system, rock, state0, dt, bc, dz, p_grad, div, faceConcentrations, @eqAssembler_JandG, options);
+  [state, conv] = solvefi_JandG_underConstruction(system.components, tstep, system, rock, state0, dt, bc, dz, p_grad, div, faceConcentrations, @eqAssembler_JandG, options);
   %SOLVEFI IS NOT GONNA CONTAIN SYSTEM OR PARAM. IT WILL CONTAIN OTHER
   %THINGS
 

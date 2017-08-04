@@ -4,7 +4,11 @@ function [a, b] = simple_mixing_rule(mixture, thermo, ai, bi)
 bip = mixture.bip;
 mixing_rule_num = thermo.mixingrule;
 temperature = mixture.temperature;
+if iscell(mixture.mole_fraction)
+x=cell2mat(mixture.mole_fraction.val);
+else
 x = mixture.mole_fraction;
+end
 
 bipeos = [bip.EOScons]+[bip.EOStdep]*temperature;
 N = length(x);

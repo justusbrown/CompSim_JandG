@@ -36,6 +36,7 @@
    fluid=state.totalFluid;
    muL=1e-3;
    muG=1e-5;
+   muW=9e-4;
    p_ref = 1*atm;       % Reference pressure
    
    %combined=[fluid(1:rock.G.cells.num)];
@@ -88,6 +89,8 @@
 [krL,krG]=quadraticRelPerm_JandG(state.So);
 bd=bc.dirichlet;
 [bc_krL, bc_krG] = quadraticRelPerm_JandG(bd.So);
+krW=0.5; %TEMPORARY
+bc_krW=0.5;%TEMPORARY
 
 g  = norm(gravity);
 %dz is already known 
@@ -95,8 +98,11 @@ g  = norm(gravity);
 %COMPUTE THE MOBILITIES
 mobL=krL./muL;
 mobG=krG./muG; %VISC DEFINED IN 
+mobW=krW./muW;
+
 bc_mobL   = bc_krL./muL;
 bc_mobG   = bc_krG./muG;
+bc_mobW=bc_krW./muW;
 
 %COMPUTE UPSTREAM DIRECTION FOR EACH COMPONENT (only including non-water
 %components because bravo-dome does, so might need change). Also, I am only
@@ -124,13 +130,14 @@ fluxC=cell(nComp_C,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
        % cell concentrations, using upwind directions.
        %RESIDUAL FOR NON WATER COMPONENTS
        bc_val = bd.Xig(ic).*bc_mobG + bd.Xio(ic).*bc_mobL; 
-       fluxC{ic} = faceConcentrations(upC{ic}, state.Xig{ic}.*mobG + state.Xio{ic}.*mobL, bc_val); %THESE Xi VALUES ARE FOR CELL 1 AND NEED TO BE FIXED
+       fluxC{ic} = faceConcentrations(upC{ic}, state.Xig{ic}.*mobG.*state.Eg + state.Xio{ic}.*mobL.*state.Eo, bc_val); %THESE Xi VALUES ARE FOR CELL 1 AND NEED TO BE FIXED
        eqs{ic} = (rock.pv/dt).*(F.*Zi{ic}-F0.*Zi0{ic})+ div(fluxC{ic}.*rock.T.*dpC{ic});
     end
 
     % Compute the residual of the mass conservation equation for water.
-    bc_val = bd.Xwv.*bc_mobG + bd.Xwl.*bc_mobL;
-    fluxW = faceConcentrations(upW, state.Xwv.*mobG + state.Xwl.*mobL, bc_val);%NEED TO ADD IN SETUPCONTROLS
+    %NEED TO DEFINE mobW and Bc_mobW
+    bc_val = bd.Ew.*bc_mobW;
+    fluxW = faceConcentrations(upW, state.Ew.*mobW, bc_val);%NEED TO ADD IN SETUPCONTROLS
     eqs{nComp_C + 1} = (rock.pv/dt).*(Ew.*Sw - Ew0.*Sw0) + div(fluxW.*rock.T.*dpW);
     %DONE COMPUTING RESIDUAL FOR WATER
     %%STILL NEED Ew gr 07/20
@@ -148,8 +155,8 @@ fluxC=cell(nComp_C,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
     dpC_total = p_grad(p) %- g*(avgMW.*dz); 
     upC_total = (double(dpC_total)>=0);
 
-    bc_val = bd.V.*bc_mobG + (1-bd.V).*bc_mobL; 
-    fluxT = faceConcentrations(upC_total, state.V.*mobG + (1-state.V).*mobL, bc_val);
+    bc_val = bd.Eg.*bc_mobG + bd.Eo.*bc_mobL; 
+    fluxT = faceConcentrations(upC_total, state.Eg.*mobG + state.Eo.*mobL, bc_val);
        %CHANGED Xia to V an 1-V. dpC{ic} NEEDS THOUGHT HERE AND I need to
        %find out if faceConc can take in a single value for varagin 2
        %%THIS NEEDS THOUGHT gr 07/20

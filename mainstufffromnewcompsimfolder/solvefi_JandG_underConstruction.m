@@ -60,6 +60,7 @@ else
     p=state.p;
     Sw=state.Sw;
     
+%{
     mole_fracs1=Zi{1}.val; %state.Zi is updated here, Zi is not
     mole_fracs2=Zi{2}.val;
     mole_fracs3=Zi{3}.val;
@@ -69,10 +70,12 @@ else
     compW=1-sum(mole_fracs(jk,:));
     mole_fracs(jk,4)=compW;
     end
-    
+    %}
     for ji=1:rock.G.cells.num
         totalFluid{ji}.pressure=state.p(ji);
-        totalFluid{ji}.mole_fraction=mole_fracs(ji,:);
+        totalFluid{ji}.mole_fraction=Zi;
+
+        %totalFluid{ji}.mole_fraction=mole_fracs(ji,:);
     end
     
     Xig=[];  state.Xig=[];  %4 components. units=MOLig/MOLg
