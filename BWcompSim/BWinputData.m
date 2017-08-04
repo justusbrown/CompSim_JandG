@@ -82,6 +82,15 @@ maxIterations=50;
 nonlinear=setBWnonlinearSolverParameters(maxIteration);
 cellwise=1:5;
 
+%%
+%%%Enter the time options for the solver
+%
+%Enter the time step
+dt = 200*day;    
+%Enter the total time
+total_time = 100000*day;  
+steps      = dt*ones(floor(total_time/dt), 1); 
+t          = cumsum(steps); 
 
 %%
 %GROUP EVERYTHING INTO OVERARCHING SYSTEM
@@ -103,6 +112,12 @@ mmW = 2*mmH + mmO;  % molar mass of H20
 litre = 1e-3*meter^3;
 rho = 1*kilogram/litre;
 system.mv = mmW/rho; %molar volume of water
+system.nonlinear=nonlinear;
+system.cellwise=cellwise;
+system.dt=dt;
+system.total_time=total_time;
+system.steps=steps;
+system.t=t;
 
 
 end

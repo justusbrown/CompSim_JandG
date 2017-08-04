@@ -17,12 +17,11 @@ function [state, convergence] = BWsolveFI(system, thermo, rock, state0, bc, equa
 
    fprintf('%13s%-26s%-36s\n', '', 'CNV (oil, water)', 'MB (oil, water)');
    
-   thermo=addThermo();
-   thermo.EOS=@PREOS;
-   equation = @(state) equation(tstep, meta.iteration, component, rock, state0, state, dt, bc,dz,p_grad,div,faceConcentrations);
+
+   equation = @(state) equation(tstep, meta.iteration, component, rock, state0, state, dt, bc,dz,p_grad,div,faceConcentrations, system);
    flash=@(fluid) GI_flash(fluid,thermo,options);
    totalFluid=state.totalFluid;
-   R=getR_JandG();
+   R=8.3145;
       %%
    % We start with the Newton iterations
    
@@ -46,30 +45,15 @@ if tstep==1 & meta.iteration==1
     Zi=state.Zi;
     Sw=state.Sw
 [p, F, Zi{:}, Sw]=initVariablesADI(state.p, state.F, state.Zi{:}, state.Sw);
-    state.p=p;
-    state.F=F;
-    state.Zi=Zi;
-    state.Sw=Sw;
+%might need to redof lash calc here for ADI purposes
 else
-    %NEED TO REDFINE SOMETHINGS HERE IN UPDATE STAATE
-    %update the fluid
-    %mole_fracs=cell2mat(state.Zi.val);
+
     Zi=state.Zi;
     F=state.F;
     p=state.p;
     Sw=state.Sw;
     
-%{
-    mole_fracs1=Zi{1}.val; %state.Zi is updated here, Zi is not
-    mole_fracs2=Zi{2}.val;
-    mole_fracs3=Zi{3}.val;
-    mole_fracs=[mole_fracs1, mole_fracs2, mole_fracs3];
 
-    for jk=1:rock.G.cells.num
-    compW=1-sum(mole_fracs(jk,:));
-    mole_fracs(jk,4)=compW;
-    end
-    %}
     for ji=1:rock.G.cells.num
         totalFluid{ji}.pressure=state.p(ji);
         totalFluid{ji}.mole_fraction=Zi;
@@ -79,8 +63,6 @@ else
     
     Xig=[];  state.Xig=[];  %4 components. units=MOLig/MOLg
     Xio=[];  state.Xio=[];%units=MOLio/MOLo
-    Xwv=[];  state.Xwv=[];%units=MOLwv/MOLw
-    Xwl=[]; state.Xwl=[];
     V=[]; state.V=[];
     Eo=[];  state.Eo=[];%ALREADY Added to each cell
     Eg=[]; state.Eg=[];
@@ -133,6 +115,8 @@ else
     So=[So;totalFluid{j}.So];
     state.So=So;
     state.So(j)=totalFluid{j}.So;
+    
+    %NEED PHASE DENSITIES HERE AND FOR THE INITIAL STATE AND MAYBE BC's
     
     end
     state.totalFluid=totalFluid;
