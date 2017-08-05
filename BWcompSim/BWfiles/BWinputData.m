@@ -16,12 +16,12 @@ function [G,rock,options,thermo,influxFluid,outfluxFluid,initialFluid, influx_ra
 %%%ENTER THE ROCK DATA
 %
 %%Enter the desired 3x3 grid dimmensions
-G = cartGrid([6, 6, 6]); 
+G = cartGrid([10, 10, 4]); %CHANGED!!!!
 G = computeGeometry(G);
 %%Enter the permeability
-rock.perm=repmat(100*milli*darcy, [G.cells.num, 1]);
+rock.perm=repmat(50*milli*darcy, [G.cells.num, 1]);
 %%Enter the porosity
-rock.poro = repmat(0.5, [G.cells.num,1]);
+rock.poro = repmat(0.1, [G.cells.num,1]);
 rock.pv=poreVolume(G,rock);
 rock.T=computeTrans(G,rock);
 rock.G=G
@@ -42,6 +42,7 @@ options.max_outer_loop = 1000;
 %%%ENTER THE INFLUX AND OUTFLUX PRESSURE DATA, INFLUX RATE, TEMPERATURE,
 %%%AND CHOICE OF EOS/MIXING RULES (included in addThermo for our sake)
 %
+%WHERE'S THIS INFO IN THE DECK!!!
 %Enter the influx pressure in Pa
 influx_p=10e6;
 %Enter the outflux pressure in Pa
@@ -49,7 +50,9 @@ outflux_p=8e6;
 %Enter the influx  in m^3/s
 influx_rate = 1000/day  
 %Enter the temperature in Kelvin
-Temp=90+273.15;
+
+%KEPT IT AS THEIR UNITS
+Temp=((160-32)*(5/9))+273.15;
 thermo=addThermo();
 thermo.EOS=@PREOS;
 thermo.vp_water=vaporPressure(Temp);
@@ -60,21 +63,34 @@ thermo.vp_water=vaporPressure(Temp);
 %%NOTE: Here, fluid properties will be input, but for development sake, our
 %%tables will be used
 %
-%Enter all fluid components 
-[components, comp_flag]=addComponents({'CH4','C2H6','C3H8','C10H22'});
+%Enter all fluid components NEW!!!!!
+[components, comp_flag]=addComponents({'C1H4','C3H8','C6H14','C10H22','C15H32','C20H42'});
 %Initialize the influx, outflux, and initial fluids
 influxFluid=addMixture(components,Temp,influx_p);
 outfluxFluid=addMixture(components,Temp,outflux_p);
 initialFluid=addMixture(components,Temp,outflux_p);
 %Enter the Influx Fluid's mole fraction
-influxFluid.Zi=[1,0,0,0];
+%JUST MADE THIS UP NEW!!!!!!a
+influxFluid.Zi=[0.4,0.03,0.17,0.1,0.25,0.05];
 %Enter the Outflux Fluid's mole fraction
-outfluxFluid.Zi=[0.25,0.25,0.25,0.25];
+outfluxFluid.Zi=[0.5,0.03,0.07,0.2,0.15,0.05];
 %Enter the Initial Fluid's mole fraction
-initialFluid.Zi=[0.25,0.25,0.25,0.25];
+initialFluid.Zi=[0.5,0.03,0.07,0.2,0.15,0.05];
 %%NOTE THAT THE MOLE FRACTION ENTERED CORRESPONDS TO THE ORDER OF
 %%COMPONENTS ENTERED
 
+%%
+%NEW!!!!!!!!
+%CRITICAL PROPERTIES
+%CHANGE THIS TO WHATEVER STRUCT THIS NEEDS TO BE
+%NOT SURE ABOUT THESE UNITS YET
+fluid.Pcrit=[667.8,616.3,436.9,304.0,200.0,162.0]
+fluid.Tcrit=[343.0,665.7,913.4,1011.8,1270.0,1380.0]
+fluid.Zcrit=[.290,.277,.264,.257,.245,.235]
+%%
+%NEW!!!!!!!
+fluid.AcenF=[.013,.1524,.3007,.4885,.6500,.8500]
+fluid.MMW=[16.04,44.10,86.18,149.29,206.00,282.00]
 %%
 %%%Enter the nonlinear solver parameters and ***cellwise***
 %
@@ -88,7 +104,7 @@ cellwise=1:5;
 %Enter the time step
 dt = 200*day;    
 %Enter the total time
-total_time = 100000*day;  
+total_time = 10*365*day;  %CHANGED
 steps      = dt*ones(floor(total_time/dt), 1); 
 t          = cumsum(steps); 
 
