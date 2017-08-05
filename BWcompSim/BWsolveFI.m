@@ -69,6 +69,10 @@ else
     Ew=[];  state.Ew=[];
     Sg=[]; state.Sg=[];
     So=[]; state.So=[];
+    rhoLi=[]; state.rhoLi=[];
+    rhoGi=[]; state.rhoGi=[];
+    rhoL=[];  state.rhoL=[];
+    rhoG=[];  state.rhoG=[];
 
     for j=1:rock.G.cells.num;
     [success_flag,stability_flag,Xiv,Xil,Zgas_vap, Zgas_liq, vapor_frac,cubic_time]=flash(totalFluid{j});
@@ -107,6 +111,22 @@ else
     Ew=[Ew;totalFluid{j}.Ew];
     state.Ew=Ew;
     
+    totalFluid{j}.rhoLi=totalFluid{j}.pressure*totalFluid{j}.components.MW(:)/(Zgas_liq*R*totalFluid{j}.temperature);
+    rhoLi=[rhoLi;totalFluid{j}.rhoLi];
+    state.rhoLi=rhoLi;
+
+    totalFluid{j}.rhoL=sum(totalFluid{j}.rhoLi.*totalFluid{j}.Zi);
+    rhoL=[rhoL;totalFluid{j}.rhoL];
+    state.rhoL=rhoL;
+
+    totalFluid{j}.rhoGi=totalFluid{j}.pressure*totalFluid{j}.components.MW(i)/(Zgas_vap*R*totalFluid{j}.temperature);
+    rhoLi=[rhoGi;totalFluid{j}.rhoGi];
+    state.rhoGi=rhoGi;
+
+    totalFluid{j}.rhoG=sum(totalFluid{j}.rhoGi.*totalFluid{j}.Zi);
+    rhoG=[rhoG;totalFluid{j}.rhoG];
+    state.rhoG=rhoG;
+    
     totalFluid{j}.Sg=state.V(j)*state.F(j)/state.Eg(j);
     Sg=[Sg;totalFluid{j}.Sg];
     state.Sg=Sg;
@@ -116,8 +136,7 @@ else
     state.So=So;
     state.So(j)=totalFluid{j}.So;
     
-    %NEED PHASE DENSITIES HERE AND FOR THE INITIAL STATE AND MAYBE BC's
-    
+   
     end
     state.totalFluid=totalFluid;
     %{

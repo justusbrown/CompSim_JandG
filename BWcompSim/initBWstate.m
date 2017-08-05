@@ -2,6 +2,7 @@
 function [state0]=initBWstate(rock,system ,pressure, options,thermo);
 
 components=system.components;
+MW=vertcat(components.MW);
 Temp=system.Temp;
 
 
@@ -21,6 +22,10 @@ Eo=[]; %ALREADY Added to each cell
 Eg=[]; %ALREADY Added to each cell
 F=[];%ALREADY Added to each cell
 Ew=[]; 
+rhoLi=[];
+rhoGi=[];
+rhoL=[];
+rhoG=[];
 %COULD MAYBE DEFINE STUFF BELOW OUTSIDE LOOP
 muL=1e-3;
 muG=1e-5;
@@ -45,15 +50,6 @@ Xio=[Xio;totalFluid{i}.Xio];
 state.Xio=Xio;
 state.Xio=num2cell(state.Xio,1);
 
-%{
-totalFluid{i}.Xwv=Xiv(4); %units=MOLwv/MOLw
-Xwv=[Xwv;totalFluid{i}.Xwv];
-state.Xwv=Xwv;
-
-totalFluid{i}.Xwl=Xil(4);
-Xwl=[Xwl;totalFluid{i}.Xwl];
-state.Xwl=Xwl;
-%}
 totalFluid{i}.V=vapor_frac;
 V=[V;totalFluid{i}.V];
 state.V=V;
@@ -84,6 +80,22 @@ state.Eo=Eo;
 totalFluid{i}.Eg=totalFluid{i}.pressure/(Zgas_vap*R*totalFluid{i}.temperature); %ALREADY Added to each cell
 Eg=[Eg;totalFluid{i}.Eg];
 state.Eg=Eg;
+
+totalFluid{i}.rhoLi=totalFluid{i}.pressure*totalFluid{i}.components.MW(:)/(Zgas_liq*R*totalFluid{i}.temperature);
+rhoLi=[rhoLi;totalFluid{i}.rhoLi];
+state.rhoLi=rhoLi;
+
+totalFluid{i}.rhoL=sum(totalFluid{i}.rhoLi.*totalFluid{i}.Zi);
+rhoL=[rhoL;totalFluid{i}.rhoL];
+state.rhoL=rhoL;
+
+totalFluid{i}.rhoGi=totalFluid{i}.pressure*totalFluid{i}.components.MW(i)/(Zgas_vap*R*totalFluid{i}.temperature);
+rhoLi=[rhoGi;totalFluid{i}.rhoGi];
+state.rhoGi=rhoGi;
+
+totalFluid{i}.rhoG=sum(totalFluid{i}.rhoGi.*totalFluid{i}.Zi);
+rhoG=[rhoG;totalFluid{i}.rhoG];
+state.rhoG=rhoG;
 
 totalFluid{i}.F=(totalFluid{i}.Eo.*totalFluid{i}.So+totalFluid{i}.Eg.*totalFluid{i}.Sg);%ALREADY Added to each cell
 F=[F;totalFluid{i}.F];

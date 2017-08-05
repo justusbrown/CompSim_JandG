@@ -75,8 +75,9 @@ bc_mobW=bc_krW./muW;
 MW=vertcat(component.MW);
 dpC = cell(1,2); %2 is the number of phases and this will be changed/fixed
 upC = cell(1,2);
+dpC{1}=p_grad(p) - g*(rhoL.*dz);
+dpC{2}=p_grad(p) - g*(rhoG.*dz);
 for phase = 1:2
-    dpC{phase} = p_grad(p) - g*(rho(phase).*dz); 
     upC{phase} = (double(dpC{phase})>=0);
 end
     dpC=dpC'; upC=upC';
