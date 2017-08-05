@@ -169,7 +169,7 @@ end
             %%
       % We update |state|. see below for equation
       %
-      state      = updateState_JandG(state, dx, 3);
+      state      = updateBWstate(state, dx, 3);
       %STOPPED HERE
       %%
       % We compute the residual values by calling |getResiduals|.

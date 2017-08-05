@@ -79,7 +79,7 @@ initialFluid.Zi=[0.25,0.25,0.25,0.25];
 %%%Enter the nonlinear solver parameters and ***cellwise***
 %
 maxIterations=50;
-nonlinear=setBWnonlinearSolverParameters(maxIteration);
+nonlinear=setBWnonlinearSolverParameters(maxIterations);
 cellwise=1:5;
 
 %%
@@ -94,7 +94,7 @@ t          = cumsum(steps);
 
 %%
 %GROUP EVERYTHING INTO OVERARCHING SYSTEM
-system.R=getR_JandG();
+system.R=8.3145;
 system.Temp=Temp;
 system.vp=thermo.vp_water;
 system.fluid=[influxFluid,outfluxFluid,initialFluid];

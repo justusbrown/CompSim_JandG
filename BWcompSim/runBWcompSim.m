@@ -6,7 +6,7 @@ gravity off
 
 %%
 %See function inputData() to change user inputs
-[G,rock,options,thermo,influxFluid,outfluxFluid,initialFluid, influx_rate, system]=inputData()
+[G,rock,options,thermo,influxFluid,outfluxFluid,initialFluid, influx_rate, system]=BWinputData()
 
 %%
 %Setup the controls/bounds
@@ -31,6 +31,19 @@ for tstep = 1 : numel(steps)
           @BWeqAssembler, options);
       
        dt = steps(tstep); 
+       
+      if ~(conv)
+         error('Convergence failed. Try smaller time steps.')
+         return
+      end
+
+   if param.do_save
+      save(fullfile(param.output_dir, sprintf('state%05d.mat', tstep)), 'state') 
+   end
+   state0 = state 
+   
+end
+
 
     
     

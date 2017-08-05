@@ -2,7 +2,7 @@
 
 function [bc]=setupBWcontrols(rock,outfluxFluid,influxFluid,influx_rate, thermo,options, system)
 
-R = getR_JandG();
+R = 8.3145;
 
 %%
 %Setup the dirichlet condition
