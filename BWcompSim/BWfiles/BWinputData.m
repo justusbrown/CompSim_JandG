@@ -55,7 +55,7 @@ influx_rate = 1000/day
 Temp=((160-32)*(5/9))+273.15;
 thermo=addThermo();
 thermo.EOS=@PREOS;
-thermo.vp_water=vaporPressure(Temp);
+thermo.vp_water=BWvaporPressure(Temp);
 
 %%
 %%%ENTER THE COMPONENENTS AND MOLE FRACTIONS FOR INFLUX, OUTFLUX, AND
@@ -84,13 +84,13 @@ initialFluid.Zi=[0.5,0.03,0.07,0.2,0.15,0.05];
 %CRITICAL PROPERTIES
 %CHANGE THIS TO WHATEVER STRUCT THIS NEEDS TO BE
 %NOT SURE ABOUT THESE UNITS YET
-%fluid.Pcrit=[667.8,616.3,436.9,304.0,200.0,162.0]
-%fluid.Tcrit=[343.0,665.7,913.4,1011.8,1270.0,1380.0]
-%fluid.Zcrit=[.290,.277,.264,.257,.245,.235]
+%fluid.component.Pcrit=[667.8,616.3,436.9,304.0,200.0,162.0]
+%fluid.component.Tcrit=[343.0,665.7,913.4,1011.8,1270.0,1380.0]
+%fluid.component.Zcrit=[.290,.277,.264,.257,.245,.235]
 %%
 %NEW!!!!!!!
-%fluid.AcenF=[.013,.1524,.3007,.4885,.6500,.8500]
-%fluid.MMW=[16.04,44.10,86.18,149.29,206.00,282.00]
+%fluid.component.AcenF=[.013,.1524,.3007,.4885,.6500,.8500]
+%fluid.component.MMW=[16.04,44.10,86.18,149.29,206.00,282.00]
 %%
 %%%Enter the nonlinear solver parameters and ***cellwise***
 %
