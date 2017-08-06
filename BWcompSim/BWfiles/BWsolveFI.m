@@ -1,7 +1,7 @@
-function [state, convergence] = BWsolveFI(system, thermo, rock, state0, bc, equation, options)
+function [state, convergence] = BWsolveFI(tstep, system, ops, thermo, rock, state0, bc, equation, options)
 
-    [components, tstep, dt, dz, p_grad, div, faceConcentrations]=deal(system.components,...
-        system.tstep, system.dt, ops.dz, ops.p_grad, ops.div, ops.faceConcentrations);
+    [components, dt, dz, p_grad, div, faceConcentrations]=deal(system.components,...
+         system.dt, ops.dz, ops.p_grad, ops.div, ops.faceConcentrations);
    
    meta = struct('converged'  , false                       , ...
                  'stopped'    , false                       , ...
@@ -18,7 +18,7 @@ function [state, convergence] = BWsolveFI(system, thermo, rock, state0, bc, equa
    fprintf('%13s%-26s%-36s\n', '', 'CNV (oil, water)', 'MB (oil, water)');
    
 
-   equation = @(state) equation(tstep, meta.iteration, component, rock, state0, state, dt, bc,dz,p_grad,div,faceConcentrations, system);
+   equation = @(state) equation(tstep, meta.iteration, components, rock, state0, state, dt, bc,dz,p_grad,div,faceConcentrations, system);
    flash=@(fluid) GI_flash(fluid,thermo,options);
    totalFluid=state.totalFluid;
    R=8.3145;

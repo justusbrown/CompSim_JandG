@@ -52,7 +52,7 @@ function [ops]=setupBWsystem(rock, bc);
 
    p_grad = @(p)(C*p + pressure_bc);  
 
-   grad = @(val, bc_val)(grad_JandG(val, bc_val, nf, C, ...
+   grad = @(val, bc_val)(BWgrad(val, bc_val, nf, C, ...
                                 is_dirichlet_faces1, dirichlet_faces1, ... 
                                 is_dirichlet_faces2, dirichlet_faces2));
 
@@ -73,5 +73,5 @@ function [ops]=setupBWsystem(rock, bc);
 %ops will be the operator struct containing everything from setupBWsystem.
 ops.div=div; ops.p_grad=p_grad; ops.grad=grad; ops.dz=dz;
 ops.faceConcentrations=faceConcentrations;
-ops.N=N; ops.G=G;
+ops.N=N; ops.G=rock.G;
 end

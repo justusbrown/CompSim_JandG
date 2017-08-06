@@ -14,7 +14,7 @@ p = mixture.pressure; %[Pa]
 T = mixture.temperature;
 N = length(critical_temp);
 fugacity_coef = zeros(1,N);
-R=8.314;
+R=8.3145;
 
 bi = 0.077796*R*critical_temp./critical_pres;
 aci=0.457235*(R*critical_temp).^2 ./critical_pres;

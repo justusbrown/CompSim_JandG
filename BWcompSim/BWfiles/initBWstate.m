@@ -67,7 +67,6 @@ Sw=[Sw;totalFluid{i}.Sw];
 state.Sw=Sw;
 
 totalFluid{i}.Zi=totalFluid{i}.Xig.*totalFluid{i}.V+totalFluid{i}.Xio.*(1-totalFluid{i}.V); %ALREADY Added to each cell
-%totalFluid{i}.Zi=num2cell(totalFluid{i}.Zi,1);
 Zi=[Zi;totalFluid{i}.Zi];
 state.Zi=Zi;
 state.Zi=num2cell(state.Zi,1);
@@ -81,21 +80,25 @@ totalFluid{i}.Eg=totalFluid{i}.pressure/(Zgas_vap*R*totalFluid{i}.temperature); 
 Eg=[Eg;totalFluid{i}.Eg];
 state.Eg=Eg;
 
-totalFluid{i}.rhoLi=totalFluid{i}.pressure*totalFluid{i}.components.MW(:)/(Zgas_liq*R*totalFluid{i}.temperature);
+totalFluid{i}.rhoLi=totalFluid{i}.pressure.*MW/(Zgas_liq*R*totalFluid{i}.temperature);
 rhoLi=[rhoLi;totalFluid{i}.rhoLi];
 state.rhoLi=rhoLi;
 
-totalFluid{i}.rhoL=sum(totalFluid{i}.rhoLi.*totalFluid{i}.Zi);
+totalFluid{i}.rhoL=totalFluid{i}.rhoLi.*totalFluid{i}.Zi;
+totalFluid{i}.rhoL=sum(totalFluid{i}.rhoL);
 rhoL=[rhoL;totalFluid{i}.rhoL];
 state.rhoL=rhoL;
+%Not summing properly
 
-totalFluid{i}.rhoGi=totalFluid{i}.pressure*totalFluid{i}.components.MW(i)/(Zgas_vap*R*totalFluid{i}.temperature);
+totalFluid{i}.rhoGi=totalFluid{i}.pressure.*MW/(Zgas_vap*R*totalFluid{i}.temperature);
 rhoLi=[rhoGi;totalFluid{i}.rhoGi];
 state.rhoGi=rhoGi;
 
-totalFluid{i}.rhoG=sum(totalFluid{i}.rhoGi.*totalFluid{i}.Zi);
+totalFluid{i}.rhoG=totalFluid{i}.rhoGi.*totalFluid{i}.Zi;
+totalFluid{i}.rhoG=sum(totalFluid{i}.rhoG);
 rhoG=[rhoG;totalFluid{i}.rhoG];
 state.rhoG=rhoG;
+%Not summing properly
 
 totalFluid{i}.F=(totalFluid{i}.Eo.*totalFluid{i}.So+totalFluid{i}.Eg.*totalFluid{i}.Sg);%ALREADY Added to each cell
 F=[F;totalFluid{i}.F];

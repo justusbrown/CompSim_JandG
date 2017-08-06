@@ -13,11 +13,12 @@
                  'iteration',   -1,  ...
                  'stepOptions', []);
    
-   fluid=state.totalFluid;
+  % fluid=state.totalFluid;
    muL=1e-3;
    muG=1e-5;
    muW=9e-4;
-   p_ref =system.p_ref;      
+   %p_ref =system.p_ref;      
+   p_ref=1*atm; %Having problems with 'system' its deleting itself somewhere before solveFi
  %%  
    if tstep~=1 & meta.iteration~=1
   

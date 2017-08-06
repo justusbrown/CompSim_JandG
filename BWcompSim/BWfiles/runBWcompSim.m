@@ -25,10 +25,12 @@ ops=setupBWsystem(rock,bc);
 [dt,total_time,steps,t,nComp]=deal(system.dt,system.total_time,...
     system.steps, system.t, system.nComp);
 
+
 for tstep = 1 : numel(steps)
     
-      [state, conv] = BWsolveFI(system, thermo, rock, state0, bc, ...
+      [state, conv] = BWsolveFI(tstep, system, ops, thermo, rock, state0, bc, ...
           @BWeqAssembler, options);
+      
       
        dt = steps(tstep); 
        

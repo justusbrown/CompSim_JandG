@@ -64,7 +64,7 @@ thermo.vp_water=vaporPressure(Temp);
 %%tables will be used
 %
 %Enter all fluid components NEW!!!!!
-[components, comp_flag]=addComponents({'C1H4','C3H8','C6H14','C10H22','C15H32','C20H42'});
+[components, comp_flag]=addComponents({'CH4','C3H8','C6H14','C10H22','C15H32','C20H42'});
 %Initialize the influx, outflux, and initial fluids
 influxFluid=addMixture(components,Temp,influx_p);
 outfluxFluid=addMixture(components,Temp,outflux_p);
@@ -80,17 +80,17 @@ initialFluid.Zi=[0.5,0.03,0.07,0.2,0.15,0.05];
 %%COMPONENTS ENTERED
 
 %%
-%NEW!!!!!!!!
+%NEW!!!!!!!! COMMENTED OUT BECAUSE WE DON'T HAVE ANYTHING CALLED FLUID
 %CRITICAL PROPERTIES
 %CHANGE THIS TO WHATEVER STRUCT THIS NEEDS TO BE
 %NOT SURE ABOUT THESE UNITS YET
-fluid.Pcrit=[667.8,616.3,436.9,304.0,200.0,162.0]
-fluid.Tcrit=[343.0,665.7,913.4,1011.8,1270.0,1380.0]
-fluid.Zcrit=[.290,.277,.264,.257,.245,.235]
+%fluid.Pcrit=[667.8,616.3,436.9,304.0,200.0,162.0]
+%fluid.Tcrit=[343.0,665.7,913.4,1011.8,1270.0,1380.0]
+%fluid.Zcrit=[.290,.277,.264,.257,.245,.235]
 %%
 %NEW!!!!!!!
-fluid.AcenF=[.013,.1524,.3007,.4885,.6500,.8500]
-fluid.MMW=[16.04,44.10,86.18,149.29,206.00,282.00]
+%fluid.AcenF=[.013,.1524,.3007,.4885,.6500,.8500]
+%fluid.MMW=[16.04,44.10,86.18,149.29,206.00,282.00]
 %%
 %%%Enter the nonlinear solver parameters and ***cellwise***
 %
