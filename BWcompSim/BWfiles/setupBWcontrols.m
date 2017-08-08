@@ -35,15 +35,23 @@ bc.dirichlet.Ew=55.5; %CORRELLATION
 %Setup the Neumann condition (influx)
 bound_cell_in=30;
 bc.in.influx_cells=bound_cell_in;
-[success_flag,stability_flag,bc.in.Xiv,bc.in.Xil,bc.in.vapor_frac,cubic_time]=GI_flash(influxFluid,thermo,options)
+bc.in.fluid=influxFluid;
+bc.in.pressure=influxFluid.pressure;
+[success_flag,stability_flag,bc.in.Xiv,bc.in.Xil, bc.in.Zgas_vap, bc.in.Zgas_liq,bc.in.vapor_frac,cubic_time]=GI_flash(bc.in.fluid,thermo,options)
 
 bc.in.Zi=bc.in.Xiv.*bc.in.vapor_frac+bc.in.Xil.*(1-bc.in.vapor_frac);
 bc.in.Zi=[bc.in.Zi];
 
+bc.in.Eg=bc.in.pressure/(bc.in.Zgas_vap*R*bc.in.fluid.temperature); 
+bc.in.Eo=bc.in.pressure/(bc.in.Zgas_liq*R*bc.in.fluid.temperature); 
+
 for ic=1:nComp
-    bc.in.C_influx(ic)=influx_rate*(bc.in.Xiv(ic)*bc.in.vapor_frac+bc.in.Xil(ic)*(1-bc.in.vapor_frac));
+    bc.in.C_influx(ic)=influx_rate*(bc.in.Xiv(ic)*bc.in.vapor_frac+bc.in.Eo*(1-bc.in.vapor_frac)); %Mols/sec
 end
 
+bc.in.T_influx(ic)=influx_rate*(bc.in.Eg*bc.in.vapor_frac+bc.in.Xil(ic)*(1-bc.in.vapor_frac)); %Mols/sec
+
+bc.in.water_influx=influx_rate/system.mv; %Mols/sec: (m^3/s * mol/m^3)
 %Currently no water influx. What is below is completely incorrect
 %bc.in.water_influx=influx_rate*(bc.in.Xil(4)*(1-bc.in.vapor_frac)+bc.in.Xiv(4)*bc.in.vapor_frac);
 end

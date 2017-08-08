@@ -123,7 +123,8 @@ fluxC=cell(nComp_C,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
        eqs{ic}(bc.in.influx_cells) = eqs{ic}(bc.in.influx_cells) - bc.in.C_influx(ic);
     end
     eqs{nComp_C + 1}(bc.in.influx_cells) = eqs{nComp_C + 1}(bc.in.influx_cells) - bc.in.water_influx;
-    
+    eqs{nComp_C + 2}(bc.in.influx_cells) = eqs{nComp_C + 2}(bc.in.influx_cells) - bc.in.T_influx;
+   
    end
    
     %DONE ADDING INPUT FLUXES
