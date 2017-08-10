@@ -1,111 +1,133 @@
 
-function [state0]=initBWstate(rock,system ,pressure, options,thermo);
+function [state0]=initBWstate(system);
 
+thermo=system.thermo;
+options=system.options;
+rock=system.rock;
 components=system.components;
 MW=vertcat(components.MW);
 Temp=system.Temp;
-
-
-numCells=rock.G.cells.num;
-R = 8.3145;
-totalFluid=cell(numCells,1);
-
-Xig=[]; %4 componentss. units=MOLig/MOLg
-Xio=[]; %units=MOLio/MOLo
-V=[];
-So=[];
-Sg=[];
-Sw=[];
-Zi=[]; %ALREADY Added to each cell
-%Zi=num2cell(Zi,1);
-Eo=[]; %ALREADY Added to each cell
-Eg=[]; %ALREADY Added to each cell
-F=[];%ALREADY Added to each cell
-Ew=[]; 
-rhoLi=[];
-rhoGi=[];
-rhoL=[];
-rhoG=[];
-%COULD MAYBE DEFINE STUFF BELOW OUTSIDE LOOP
+Cells=system.Cells;
+nCell=system.nCell;
+nComp=system.nComp;
+R=thermo.R;
+totalFluid=system.totalFluid;
+%pressure=totalFluid.pressure;
 muL=1e-3;
 muG=1e-5;
 cl    = system.cl;  % Compressibility
 p_ref = system.p_ref;       % Reference pressure
 
+for i=1:nCell
+    p(i)=totalFluid(i).pressure;
+    Zi(i,:)=totalFluid(i).mole_fraction;
+end
+p=p';
+Zi=num2cell(Zi, 1);
 
 
-for i=1:numCells
-    totalFluid{i}=addMixture(components, Temp, pressure);
+Xig=ones(nCell, nComp); %4 componentss. units=MOLig/MOLg
+Xio=ones(nCell, nComp); %units=MOLio/MOLo
+V=ones(nCell, 1);
+So=ones(nCell, 1);
+Sg=ones(nCell, 1);
+Sw=ones(nCell, 1);
+Eo=ones(nCell, 1); 
+Eg=ones(nCell, 1); 
+F=ones(nCell, 1);
+Ew=ones(nCell, 1); 
+rhoLi=ones(nCell, nComp);
+rhoGi=ones(nCell, nComp);
+rhoL=ones(nCell, 1);
+rhoG=ones(nCell, 1);
+
+pressure=cat(1,totalFluid.pressure);
+
+
+[p, F, Zi{:}, Sw]=initVariablesADI(pressure, F, Zi{:}, Sw);
+%Zi.val=reshape(Zi.val, nCell, nComp);
+for i=1:nCell
+totalFluid(i).Zi=[];
+end
+
+for i=1:nCell
+    totalFluid(i).pressure=p(i);
+    totalFluid(i).F=F(i);
+    totalFluid(i).Zi=[Zi{1}(i); Zi{2}(i);Zi{3}(i);Zi{4}(i);Zi{5}(i);Zi{6}(i)];
+    totalFluid(i).Zi.val=totalFluid(i).Zi.val';
+end
+
+
+for i=1:nCell    
     
-    
-[success_flag,stability_flag,Xiv,Xil,Zgas_vap,Zgas_liq,vapor_frac,cubic_time]=GI_flash(totalFluid{i},thermo,options);
+[success_flag,stability_flag,Xiv,Xil,Zgas_vap,Zgas_liq,vapor_frac,cubic_time]=GI_flashADI(totalFluid(i), thermo,options);
 
-totalFluid{i}.Xig=Xiv; %4 components. units=MOLig/MOLg
-Xig=[Xig;totalFluid{i}.Xig];
+totalFluid(i).Xig=Xiv; %4 components. units=MOLig/MOLg
+Xig=[Xig;totalFluid(i).Xig];
 state.Xig=Xig;
 state.Xig=num2cell(state.Xig,1);
 
-totalFluid{i}.Xio=Xil; %units=MOLio/MOLo
-Xio=[Xio;totalFluid{i}.Xio];
+totalFluid(i).Xio=Xil; %units=MOLio/MOLo
+Xio=[Xio;totalFluid(i).Xio];
 state.Xio=Xio;
 state.Xio=num2cell(state.Xio,1);
 
-totalFluid{i}.V=vapor_frac;
-V=[V;totalFluid{i}.V];
+totalFluid(i).V=vapor_frac;
+V=[V;totalFluid(i).V];
 state.V=V;
 
-totalFluid{i}.So=.25;
-So=[So;totalFluid{i}.So];
+totalFluid(i).So=.25;
+So=[So;totalFluid(i).So];
 state.So=So;
 
-totalFluid{i}.Sg=.30;
-Sg=[Sg;totalFluid{i}.Sg];
+totalFluid(i).Sg=.30;
+Sg=[Sg;totalFluid(i).Sg];
 state.Sg=Sg;
 
-totalFluid{i}.Sw=1-totalFluid{i}.So-totalFluid{i}.Sg;
-Sw=[Sw;totalFluid{i}.Sw];
+totalFluid(i).Sw=1-totalFluid(i).So-totalFluid(i).Sg;
+Sw=[Sw;totalFluid(i).Sw];
 state.Sw=Sw;
 
-totalFluid{i}.Zi=totalFluid{i}.Xig.*totalFluid{i}.V+totalFluid{i}.Xio.*(1-totalFluid{i}.V); %ALREADY Added to each cell
-Zi=[Zi;totalFluid{i}.Zi];
+totalFluid(i).Zi=totalFluid(i).Xig.*totalFluid(i).V+totalFluid(i).Xio.*(1-totalFluid(i).V); %ALREADY Added to each cell
+Zi=[Zi;totalFluid(i).Zi];
 state.Zi=Zi;
 state.Zi=num2cell(state.Zi,1);
-totalFluid{i}.mole_fraction=Zi;
+totalFluid(i).mole_fraction=Zi;
 
-totalFluid{i}.Eo=totalFluid{i}.pressure/(Zgas_liq*R*totalFluid{i}.temperature); %ALREADY Added to each cell
-Eo=[Eo;totalFluid{i}.Eo];
+totalFluid(i).Eo=totalFluid(i).pressure/(Zgas_liq*R*totalFluid(i).temperature); %ALREADY Added to each cell
+Eo=[Eo;totalFluid(i).Eo];
 state.Eo=Eo;
 
-totalFluid{i}.Eg=totalFluid{i}.pressure/(Zgas_vap*R*totalFluid{i}.temperature); %ALREADY Added to each cell
-Eg=[Eg;totalFluid{i}.Eg];
+totalFluid(i).Eg=totalFluid(i).pressure/(Zgas_vap*R*totalFluid(i).temperature); %ALREADY Added to each cell
+Eg=[Eg;totalFluid(i).Eg];
 state.Eg=Eg;
 
-totalFluid{i}.rhoLi=totalFluid{i}.pressure.*MW/(Zgas_liq*R*totalFluid{i}.temperature);
-rhoLi=[rhoLi;totalFluid{i}.rhoLi];
+totalFluid(i).rhoLi=totalFluid(i).pressure.*MW/(Zgas_liq*R*totalFluid(i).temperature);
+rhoLi=[rhoLi;totalFluid(i).rhoLi];
 state.rhoLi=rhoLi;
 
-totalFluid{i}.rhoL=totalFluid{i}.rhoLi.*totalFluid{i}.Zi;
-totalFluid{i}.rhoL=sum(totalFluid{i}.rhoL);
-rhoL=[rhoL;totalFluid{i}.rhoL];
+totalFluid(i).rhoL=totalFluid(i).rhoLi.*totalFluid(i).Zi;
+totalFluid(i).rhoL=sum(totalFluid(i).rhoL);
+rhoL=[rhoL;totalFluid(i).rhoL];
 state.rhoL=rhoL;
 %Not summing properly
 
-totalFluid{i}.rhoGi=totalFluid{i}.pressure.*MW/(Zgas_vap*R*totalFluid{i}.temperature);
-rhoLi=[rhoGi;totalFluid{i}.rhoGi];
+totalFluid(i).rhoGi=totalFluid(i).pressure.*MW/(Zgas_vap*R*totalFluid(i).temperature);
+rhoLi=[rhoGi;totalFluid(i).rhoGi];
 state.rhoGi=rhoGi;
 
-totalFluid{i}.rhoG=totalFluid{i}.rhoGi.*totalFluid{i}.Zi;
-totalFluid{i}.rhoG=sum(totalFluid{i}.rhoG);
-rhoG=[rhoG;totalFluid{i}.rhoG];
+totalFluid(i).rhoG=totalFluid(i).rhoGi.*totalFluid(i).Zi;
+totalFluid(i).rhoG=sum(totalFluid(i).rhoG);
+rhoG=[rhoG;totalFluid(i).rhoG];
 state.rhoG=rhoG;
 %Not summing properly
 
-totalFluid{i}.F=(totalFluid{i}.Eo.*totalFluid{i}.So+totalFluid{i}.Eg.*totalFluid{i}.Sg);%ALREADY Added to each cell
-F=[F;totalFluid{i}.F];
+totalFluid(i).F=(totalFluid(i).Eo.*totalFluid(i).So+totalFluid(i).Eg.*totalFluid(i).Sg);%ALREADY Added to each cell
+F=[F;totalFluid(i).F];
 state.F=F;
 
-totalFluid{i}.Ew=55.5; 
-Ew=[Ew;totalFluid{i}.Ew];
+totalFluid(i).Ew=55.5; 
+Ew=[Ew;totalFluid(i).Ew];
 state.Ew=Ew;
 
 

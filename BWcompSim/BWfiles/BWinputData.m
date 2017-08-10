@@ -8,9 +8,9 @@
 
 %FUNCTION inputData
 
-function [G,rock,options,thermo,influxFluid,outfluxFluid,initialFluid, influx_rate, system]=inputData()
+function [system]=inputData()
 
-
+system=struct();
 %
 %%
 %%%ENTER THE ROCK DATA
@@ -25,6 +25,9 @@ rock.poro = repmat(0.1, [G.cells.num,1]);
 rock.pv=poreVolume(G,rock);
 rock.T=computeTrans(G,rock);
 rock.G=G
+system.Cells=rock.G.cells;
+system.nCell=rock.G.cells.num;
+
 
 %%
 %%%ENTER THE PVTi OPTIONS
@@ -44,18 +47,23 @@ options.max_outer_loop = 1000;
 %
 %WHERE'S THIS INFO IN THE DECK!!!
 %Enter the influx pressure in Pa
-influx_p=10e6;
+system.influx_p=10e6;
 %Enter the outflux pressure in Pa
-outflux_p=8e6;
+system.outflux_p=8e6;
+%Assuming system pressure=outflux pressure
+for i=1:system.nCell
+    system.Cells.pressure(i)=system.outflux_p;
+end
 %Enter the influx  in m^3/s
-influx_rate = 1000/day  
+system.influx_rate = 1000/day  
 %Enter the temperature in Kelvin
-
 %KEPT IT AS THEIR UNITS
-Temp=((160-32)*(5/9))+273.15;
-thermo=addThermo();
-thermo.EOS=@PREOS;
-thermo.vp_water=BWvaporPressure(Temp);
+system.Temp=((160-32)*(5/9))+273.15;
+system.thermo=addThermo();
+system.thermo.EOS=@PREOS;
+system.thermo.EOS_ADI=@PREOS_ADI;
+system.thermo.vp_water=BWvaporPressure(system.Temp);
+system.thermo.R=8.3145;
 
 %%
 %%%ENTER THE COMPONENENTS AND MOLE FRACTIONS FOR INFLUX, OUTFLUX, AND
@@ -65,17 +73,23 @@ thermo.vp_water=BWvaporPressure(Temp);
 %
 %Enter all fluid components NEW!!!!!
 [components, comp_flag]=addComponents({'CH4','C3H8','C6H14','C10H22','C15H32','C20H42'});
-%Initialize the influx, outflux, and initial fluids
-influxFluid=addMixture(components,Temp,influx_p);
-outfluxFluid=addMixture(components,Temp,outflux_p);
-initialFluid=addMixture(components,Temp,outflux_p);
+system.components=components;
+system.nComp=length(components);
+
+%Enter the Initial Fluid's mole fraction
+mole_fraction=[0.5,0.03,0.07,0.2,0.15,0.05];
+%Assign the initialFluid to the entire system using addBWfluid
+totalFluid=addBWfluid(system, mole_fraction);
+%Initialize the influx, outflux fluida
+influxFluid=addMixture(system.components,system.Temp,system.influx_p);
+outfluxFluid=addMixture(system.components,system.Temp,system.outflux_p);
 %Enter the Influx Fluid's mole fraction
 %JUST MADE THIS UP NEW!!!!!!a
 influxFluid.Zi=[0.4,0.03,0.17,0.1,0.25,0.05];
+%influxFluid.Temp=influxFluid.temperature;
 %Enter the Outflux Fluid's mole fraction
 outfluxFluid.Zi=[0.5,0.03,0.07,0.2,0.15,0.05];
-%Enter the Initial Fluid's mole fraction
-initialFluid.Zi=[0.5,0.03,0.07,0.2,0.15,0.05];
+%outfluxFluid.Temp=outfluxFluid.temperature;
 %%NOTE THAT THE MOLE FRACTION ENTERED CORRESPONDS TO THE ORDER OF
 %%COMPONENTS ENTERED
 
@@ -94,46 +108,38 @@ initialFluid.Zi=[0.5,0.03,0.07,0.2,0.15,0.05];
 %%
 %%%Enter the nonlinear solver parameters and ***cellwise***
 %
-maxIterations=50;
-nonlinear=setBWnonlinearSolverParameters(maxIterations);
-cellwise=1:5;
+options.maxIterations=50;
+options.nonlinear=setBWnonlinearSolverParameters(options.maxIterations);
+options.cellwise=1:5;
 
 %%
 %%%Enter the time options for the solver
 %
 %Enter the time step
-dt = 200*day;    
+options.dt = 200*day;    
 %Enter the total time
-total_time = 10*365*day;  %CHANGED
-steps      = dt*ones(floor(total_time/dt), 1); 
-t          = cumsum(steps); 
+options.total_time = 10*365*day;  %CHANGED
+options.steps      = options.dt*ones(floor(options.total_time/options.dt), 1); 
+options.t          = cumsum(options.steps); 
 
 %%
 %GROUP EVERYTHING INTO OVERARCHING SYSTEM
-system.R=8.3145;
-system.Temp=Temp;
-system.vp=thermo.vp_water;
-system.fluid=[influxFluid,outfluxFluid,initialFluid];
+system.options=options;
+system.totalFluid=totalFluid;
+system.influxFluid=influxFluid;
+system.outfluxFluid=outfluxFluid;
+system.rock=rock;
 system.components=components;
 system.cl=4.4e-5/atm; % Compressibility
 system.p_ref = 1*atm;      % Reference pressure
-influxFluid.call=1; %These are setup to avoid confusion when referenceing the fluid vector
-outfluxFluid.call=2;
-initialFluid.call=3;
-system.nComp=numel(components);
 %water info
 mmH  = 1.00794*gram;  % molar mass of Hydrogen
 mmO  = 15.9994*gram;  % molar mass of Oxygen
 mmW = 2*mmH + mmO;  % molar mass of H20
 litre = 1e-3*meter^3;
 rho = 1*kilogram/litre;
-system.mv = mmW/rho; %molar volume of water
-system.nonlinear=nonlinear;
-system.cellwise=cellwise;
-system.dt=dt;
-system.total_time=total_time;
-system.steps=steps;
-system.t=t;
+system.mv_water=mmW/rho;
+
 
 
 end

@@ -6,19 +6,19 @@ gravity off
 
 %%
 %See function inputData() to change user inputs
-[G,rock,options,thermo,influxFluid,outfluxFluid,initialFluid, influx_rate, system]=BWinputData()
+[system]=BWinputData()
 
 %%
 %Setup the controls/bounds
-bc=setupBWcontrols(rock,outfluxFluid,influxFluid,influx_rate,thermo,options, system);
+bc=setupBWcontrols(system);
 
 %%
 %Setup the system/operators
-ops=setupBWsystem(rock,bc);
+ops=setupBWsystem(system,bc);
 
 %%
 %Initialize the state
-[state0]=initBWstate(rock,system, initialFluid.pressure, options, thermo);
+[state0]=initBWstate(system);
 
 %%
 %Begin solving the system

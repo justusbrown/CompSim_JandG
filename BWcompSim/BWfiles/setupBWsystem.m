@@ -1,6 +1,6 @@
  
-function [ops]=setupBWsystem(rock, bc);
-
+function [ops]=setupBWsystem(system, bc);
+   rock=system.rock
    cf = rock.G.cells.faces(:,1);
    nf = rock.G.faces.num;
    nc = rock.G.cells.num;
