@@ -1,4 +1,3 @@
-
 function [state0]=initBWstate(system);
 
 thermo=system.thermo;
@@ -18,49 +17,38 @@ muG=1e-5;
 cl    = system.cl;  % Compressibility
 p_ref = system.p_ref;       % Reference pressure
 
-for i=1:nCell
-    p(i)=totalFluid(i).pressure;
-    Zi(i,:)=totalFluid(i).mole_fraction;
-end
-p=p';
-Zi=num2cell(Zi, 1);
+%for i=1:nCell
+ %   p(i)=totalFluid(i).pressure;
+  %  Zi(i,:)=totalFluid(i).mole_fraction;
+%end
+%p=p';
+%Zi=num2cell(Zi, 1);
 
+Zi=[]
+Xig=[]; %4 componentss. units=MOLig/MOLg
+Xio=[]; %units=MOLio/MOLo
+V=[];
+So=[];
+Sg=[];
+Sw=[];
+Eo=[]; 
+Eg=[]; 
+F=[];
+Ew=[]; 
+%rhoLi=[];
+%rhoGi=[];
+rhoL=[];
+rhoG=[];
 
-Xig=ones(nCell, nComp); %4 componentss. units=MOLig/MOLg
-Xio=ones(nCell, nComp); %units=MOLio/MOLo
-V=ones(nCell, 1);
-So=ones(nCell, 1);
-Sg=ones(nCell, 1);
-Sw=ones(nCell, 1);
-Eo=ones(nCell, 1); 
-Eg=ones(nCell, 1); 
-F=ones(nCell, 1);
-Ew=ones(nCell, 1); 
-rhoLi=ones(nCell, nComp);
-rhoGi=ones(nCell, nComp);
-rhoL=ones(nCell, 1);
-rhoG=ones(nCell, 1);
-
-pressure=cat(1,totalFluid.pressure);
-
-
-[p, F, Zi{:}, Sw]=initVariablesADI(pressure, F, Zi{:}, Sw);
-%Zi.val=reshape(Zi.val, nCell, nComp);
-for i=1:nCell
-totalFluid(i).Zi=[];
-end
+%pressure=cat(1,totalFluid.pressure);
 
 for i=1:nCell
-    totalFluid(i).pressure=p(i);
-    totalFluid(i).F=F(i);
-    totalFluid(i).Zi=[Zi{1}(i); Zi{2}(i);Zi{3}(i);Zi{4}(i);Zi{5}(i);Zi{6}(i)];
-    totalFluid(i).Zi.val=totalFluid(i).Zi.val';
+totalFluid(i).Zi=totalFluid(i).mole_fraction;
 end
-
 
 for i=1:nCell    
     
-[success_flag,stability_flag,Xiv,Xil,Zgas_vap,Zgas_liq,vapor_frac,cubic_time]=GI_flashADI(totalFluid(i), thermo,options);
+[success_flag,stability_flag,Xiv,Xil,Zgas_vap,Zgas_liq,vapor_frac,cubic_time]=GI_flash(totalFluid(i), thermo,options);
 
 totalFluid(i).Xig=Xiv; %4 components. units=MOLig/MOLg
 Xig=[Xig;totalFluid(i).Xig];
@@ -94,32 +82,40 @@ state.Zi=Zi;
 state.Zi=num2cell(state.Zi,1);
 totalFluid(i).mole_fraction=Zi;
 
-totalFluid(i).Eo=totalFluid(i).pressure/(Zgas_liq*R*totalFluid(i).temperature); %ALREADY Added to each cell
+totalFluid(i).Eo=totalFluid(i).pressure/(Zgas_liq*R*totalFluid(i).Temp); %ALREADY Added to each cell
 Eo=[Eo;totalFluid(i).Eo];
 state.Eo=Eo;
 
-totalFluid(i).Eg=totalFluid(i).pressure/(Zgas_vap*R*totalFluid(i).temperature); %ALREADY Added to each cell
+totalFluid(i).Eg=totalFluid(i).pressure/(Zgas_vap*R*totalFluid(i).Temp); %ALREADY Added to each cell
 Eg=[Eg;totalFluid(i).Eg];
 state.Eg=Eg;
 
-totalFluid(i).rhoLi=totalFluid(i).pressure.*MW/(Zgas_liq*R*totalFluid(i).temperature);
-rhoLi=[rhoLi;totalFluid(i).rhoLi];
-state.rhoLi=rhoLi;
-
-totalFluid(i).rhoL=totalFluid(i).rhoLi.*totalFluid(i).Zi;
-totalFluid(i).rhoL=sum(totalFluid(i).rhoL);
-rhoL=[rhoL;totalFluid(i).rhoL];
+totalFluid(i).rhoL=totalFluid(i).Eo*sum(MW.*totalFluid(i).Xio);
+rhoL=[rhoL; totalFluid(i).rhoL];
 state.rhoL=rhoL;
+
+totalFluid(i).rhoG=totalFluid(i).Eg*sum(MW.*totalFluid(i).Xig);
+rhoG=[rhoG; totalFluid(i).rhoG];
+state.rhoG=rhoG;
+
+%totalFluid(i).rhoLi=totalFluid(i).pressure.*MW/(Zgas_liq*R*totalFluid(i).Temp);
+%rhoLi=[rhoLi;totalFluid(i).rhoLi];
+%state.rhoLi=rhoLi;
+
+%totalFluid(i).rhoL=totalFluid(i).rhoLi.*totalFluid(i).Zi;
+%totalFluid(i).rhoL=sum(totalFluid(i).rhoL);
+%rhoL=[rhoL;totalFluid(i).rhoL];
+%state.rhoL=rhoL;
 %Not summing properly
 
-totalFluid(i).rhoGi=totalFluid(i).pressure.*MW/(Zgas_vap*R*totalFluid(i).temperature);
-rhoLi=[rhoGi;totalFluid(i).rhoGi];
-state.rhoGi=rhoGi;
+%totalFluid(i).rhoGi=totalFluid(i).pressure.*MW/(Zgas_vap*R*totalFluid(i).Temp);
+%rhoLi=[rhoGi;totalFluid(i).rhoGi];
+%state.rhoGi=rhoGi;
 
-totalFluid(i).rhoG=totalFluid(i).rhoGi.*totalFluid(i).Zi;
-totalFluid(i).rhoG=sum(totalFluid(i).rhoG);
-rhoG=[rhoG;totalFluid(i).rhoG];
-state.rhoG=rhoG;
+%totalFluid(i).rhoG=totalFluid(i).rhoGi.*totalFluid(i).Zi;
+%totalFluid(i).rhoG=sum(totalFluid(i).rhoG);
+%rhoG=[rhoG;totalFluid(i).rhoG];
+%state.rhoG=rhoG;
 %Not summing properly
 
 totalFluid(i).F=(totalFluid(i).Eo.*totalFluid(i).So+totalFluid(i).Eg.*totalFluid(i).Sg);%ALREADY Added to each cell
@@ -137,11 +133,17 @@ end
 
 state.totalFluid=totalFluid;
 
-   state.p=zeros(rock.G.cells.num,1);
+for i=1:nCell
+   state.p(i)=totalFluid(i).pressure;
+end
+state.p=state.p'
+
+  % state.p=zeros(rock.G.cells.num,1);
    
-   for iT=1:rock.G.cells.num;
-       state.p(iT)=state.totalFluid{iT}.pressure;
-   end
+  % for iT=1:rock.G.cells.num;
+       %state.p(iT)=state.totalFluid{iT}.pressure;
+   %end
+   %state.p=state.p'
 %{
 %ONLY HIGHLIGHTING THE PRIMARIES
    %state.Zi=totalFluid.Zi;
