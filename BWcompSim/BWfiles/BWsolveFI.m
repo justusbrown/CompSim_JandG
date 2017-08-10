@@ -1,11 +1,14 @@
-function [state, convergence] = BWsolveFI(tstep, system, ops, thermo, rock, state0, bc, equation, options)
-
-    [components, dt, dz, p_grad, div, faceConcentrations]=deal(system.components,...
-         system.dt, ops.dz, ops.p_grad, ops.div, ops.faceConcentrations);
+function [state, conv] = BWsolveFI(tstep, system, ops, state0, bc, ...
+          equation);
+      
+      [components, dt, dz, p_grad, div, faceConcentrations]=deal(system.components,...
+         system.options.dt, ops.dz, ops.p_grad, ops.div, ops.faceConcentrations);
    
+     [thermo, rock]=deal(system.thermo, system.rock);
+     
    meta = struct('converged'  , false                       , ...
                  'stopped'    , false                       , ...
-                 'relax'      , system.nonlinear.relaxation , ...
+                 'relax'      , system.options.nonlinear.relaxation , ...
                  'stagnate'   , false                       , ...
                  'iteration'  , 0                           , ... 
                  'res_history', []                          );
@@ -21,7 +24,7 @@ function [state, convergence] = BWsolveFI(tstep, system, ops, thermo, rock, stat
    equation = @(state) equation(tstep, meta.iteration, components, rock, state0, state, dt, bc,dz,p_grad,div,faceConcentrations, system);
    flash=@(fluid) GI_flash(fluid,thermo,options);
    totalFluid=state.totalFluid;
-   R=8.3145;
+   R=thermo.R;
       %%
    % We start with the Newton iterations
    
@@ -38,6 +41,7 @@ function [state, convergence] = BWsolveFI(tstep, system, ops, thermo, rock, stat
       %PROBABLY WONT NEED THIS[C, p] = deal(state.C, state.pressure);
       
 %IF tstep=1 and Newton iter =1 then I wanna skip this.So..
+%{
 if tstep==1 & meta.iteration==1
     state=state0
     p=state.p;
@@ -60,6 +64,7 @@ else
 
         %totalFluid{ji}.mole_fraction=mole_fracs(ji,:);
     end
+%}
     
     Xig=[];  state.Xig=[];  %4 components. units=MOLig/MOLg
     Xio=[];  state.Xio=[];%units=MOLio/MOLo
@@ -150,7 +155,7 @@ else
     totalFluid{i}.Ew=55.5; 
 %THIS IS EVERYTHING NOT BEING CHANGED BY NEWTON SOLVER
 %}
-end
+%end
 
       %%
       % The residual equations for the whole system (pressure, total concentrations,
@@ -207,7 +212,10 @@ end
    dispif(mrstVerbose, 'Completed %d iterations in %1.2f s\n', ...
           meta.iteration, toc(timer));
 
-end
+      
+      
+      end
+
 
 
 
