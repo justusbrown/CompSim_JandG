@@ -22,8 +22,8 @@ ops=setupBWsystem(system,bc);
 
 %%
 %Begin solving the system
-[dt,total_time,steps,t,nComp]=deal(system.dt,system.total_time,...
-    system.steps, system.t, system.nComp);
+[dt,total_time,steps,t,nComp]=deal(system.options.dt,system.options.total_time,...
+    system.options.steps, system.options.t, system.nComp);
 
 
 for tstep = 1 : numel(steps)
