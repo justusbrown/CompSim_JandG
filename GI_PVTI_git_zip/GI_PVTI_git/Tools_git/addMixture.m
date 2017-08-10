@@ -7,4 +7,4 @@ mixture.components = components;
 n = length(components);
 mixture.Zi = 1./(n*ones(1,n));
 mixture.pressure = p_Pa; %[Pa]
-mixture.temperature = T_K; % [K]
+mixture.Temp = T_K; % [K]

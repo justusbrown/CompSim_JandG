@@ -1,4 +1,4 @@
-function [fugacity_coef,Zgas_vap, Zgas_liq, success_flag] = PREOS(mixture, thermo)
+function [fugacity_coef,Zgas_vap, Zgas_liq, success_flag] = PREOS_ADI(mixture, thermo)
 % T and critical temperature in [K]
 % P and critical pressure in [bar]
 % HR in [J/mol]
@@ -24,10 +24,10 @@ alfai = 1+mi.*(1-sqrt(Tr));   %//alfai=ai^0.5
 alfa = alfai.^2.0;           %//alfa=ai
 ai = aci .* alfa;
 
-[a,b] = simple_mixing_rule(mixture, thermo, ai, bi);
+[a,b] = simple_mixing_ruleADI(mixture, thermo, ai, bi);
 A_coef=a*p/(R*T)^2;
 B_coef=b*p/(R*T);
-poly_coef = [1 -1+B_coef A_coef-B_coef*(2.0+3*B_coef) -B_coef*(A_coef-B_coef*(1+B_coef))];
+poly_coef = [1, -1+B_coef.val, A_coef.val-B_coef.val*(2.0+3*B_coef.val), -B_coef.val*(A_coef.val-B_coef.val*(1+B_coef.val))];
 z_root = roots(poly_coef);
 %---------------------------------------------------------------------
 %root selection
@@ -61,11 +61,13 @@ end
 %--------------------------------------------------------------------------------
 if (fug_need==1)
     part1=bi/b*(zz-1)-log(zz-b*p/(R*T));
-    part2=x*(sqrt(ai'*ai).*(1-[BIP.EOScons]-[BIP.EOStdep]*T))';
-    part3=A_coef/(2.828*B_coef)*(bi/b-2/a*part2) ...
-        *log((zz+2.414*b*p/(R*T))/(zz-0.414*b*p/(R*T)));
-    fugacity_coef=exp(part1+part3);
+    part2=x(:)*(sqrt(ai'*ai).*(1-[BIP.EOScons]-[BIP.EOStdep]*T))';
+    part3=A_coef.val/(2.828*B_coef.val)*(bi/b-2/a.val*part2) ...
+        *log((zz+2.414*b*p.val/(R*T))/(zz-0.414*b*p.val/(R*T)));
+    fugacity_coef=exp(part1.val+part3.val);
 end
+%Error using  /  (line 200)
+%Operation not supported
 
 end
 
