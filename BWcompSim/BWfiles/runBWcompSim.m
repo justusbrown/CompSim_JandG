@@ -22,17 +22,18 @@ ops=setupBWsystem(system,bc);
 
 %%
 %Begin solving the system
-[dt,total_time,steps,t,nComp]=deal(system.dt,system.total_time,...
-    system.steps, system.t, system.nComp);
+%[dt,total_time,steps,t,nComp]=deal(system.dt,system.total_time,...
+    %system.steps, system.t, system.nComp);
 
 
-for tstep = 1 : numel(steps)
+for tstep = 1 : numel(system.options.steps)
     
-      [state, conv] = BWsolveFI(tstep, system, ops, thermo, rock, state0, bc, ...
-          @BWeqAssembler, options);
+      [state, conv] = BWsolveFInew(tstep, system, ops, state0, bc, ...
+          @BWeqAssembler);
       
       
        dt = steps(tstep); 
+       system.options.dt=dt
        
       if ~(conv)
          error('Convergence failed. Try smaller time steps.')
