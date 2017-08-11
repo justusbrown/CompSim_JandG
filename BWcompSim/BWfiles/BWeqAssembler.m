@@ -83,7 +83,10 @@ bc_mobW=bc_krW./muW;
 %components because bravo-dome does, so might need change). Also, I am only
 %establishing everything as cell arrays becuase bravo dome does and i think
 %they might need to be that way for solvefi.. might change also
-MW=vertcat(component.MW);
+MW=vertcat(components.MW);
+rhoL=state.rhoL;
+rhoG=state.rhoG;
+
 dpC = cell(1,2); %2 is the number of phases and this will be changed/fixed
 upC = cell(1,2);
 dpC{1}=p_grad(p) - g*(rhoL.*dz);
