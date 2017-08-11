@@ -32,12 +32,12 @@
    p_ref=1*atm; %Having problems with 'system' its deleting itself somewhere before solveFi
  %%  
   
-   Ew=state.Ew
+   Ew=state.Ew;
    
    p=state.p;
    F=state.F;
    Zi=state.Zi;
-   Sw=state.Sw
+   Sw=state.Sw;
 
 [p, F, Zi{:}, Sw]=initVariablesADI(state.p, state.F, state.Zi{:}, state.Sw);
    
@@ -46,7 +46,7 @@
    F0=state0.F;
    Zi0=state0.Zi;
    %Zi0=num2cell(Zi0,1); %THIS IS JUST TO MAKE Zi a 1x3 cell array LIKE C in BravoDome
-   Sw0=state0.Sw
+   Sw0=state0.Sw;
    Ew0=state0.Ew;
   
  %%    
@@ -108,10 +108,10 @@ fluxC=cell(nComp,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
     %end
     
     for ic = 1 : nComp
-       bc_valG = bd.Xig(ic).*bc_mobG
+       bc_valG = bd.Xig(ic).*bc_mobG;
        bc_valL= bd.Xio(ic).*bc_mobL; 
-       valL=state.Xio{ic}.*mobL.*state.Eo
-       valG=state.Xig{ic}.*mobG.*state.Eg
+       valL=state.Xio{ic}.*mobL.*state.Eo;
+       valG=state.Xig{ic}.*mobG.*state.Eg;
        fluxL{ic} = faceConcentrations(upC{1}, valL, bc_valL); %THESE Xi VALUES ARE FOR CELL 1 AND NEED TO BE FIXED
        fluxG{ic}= faceConcentrations(upC{2}, valG, bc_valG);
        fluxC{ic}=fluxL{ic}.*dpC{1}+fluxG{ic}.*dpC{2};

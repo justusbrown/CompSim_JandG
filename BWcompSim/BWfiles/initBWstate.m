@@ -24,7 +24,7 @@ p_ref = system.p_ref;       % Reference pressure
 %p=p';
 %Zi=num2cell(Zi, 1);
 
-Zi=[]
+Zi=[];
 Xig=[]; %4 componentss. units=MOLig/MOLg
 Xio=[]; %units=MOLio/MOLo
 V=[];
@@ -94,9 +94,9 @@ totalFluid(i).rhoL=totalFluid(i).Eo*sum(MW'.*totalFluid(i).Xio);
 rhoL=[rhoL; totalFluid(i).rhoL];
 state.rhoL=rhoL;
 
-%totalFluid(i).rhoG=totalFluid(i).Eg*sum(MW'.*totalFluid(i).Xig);
-%rhoG=[rhoG; totalFluid(i).rhoG];
-%state.rhoG=rhoG;
+totalFluid(i).rhoG=totalFluid(i).Eg*sum(MW'.*totalFluid(i).Xig);
+rhoG=[rhoG; totalFluid(i).rhoG];
+state.rhoG=rhoG;
 
 %totalFluid(i).rhoLi=totalFluid(i).pressure.*MW/(Zgas_liq*R*totalFluid(i).Temp);
 %rhoLi=[rhoLi;totalFluid(i).rhoLi];

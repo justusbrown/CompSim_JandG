@@ -41,6 +41,8 @@ switch num_root
     case 0
        success_flag = 0;
        fug_need = 0;
+       Zgas_vap=nan;
+       Zgas_liq=nan;
     case 1
         zz = z_root(1);
         Zgas_vap=zz;
