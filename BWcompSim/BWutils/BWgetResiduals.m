@@ -1,6 +1,6 @@
 function [meta, residuals] = BWgetResiduals(meta, eqs, system, linsolver_diverged)
    if nargin < 4, solver_diverged = false; end
-
+%
     % Store the residuals for debugging and convergence testing.
     residuals = cellfun(@(x) norm(x.val, 'inf'), eqs);
 
@@ -12,15 +12,15 @@ function [meta, residuals] = BWgetResiduals(meta, eqs, system, linsolver_diverge
 
     % Try a simple detection of oscillations, and relax the next iteration if
     % oscillations were detected.
-    [oscillate stagnate] = detectNewtonOscillations(meta.res_history, system.cellwise, meta.iteration, system.nonlinear.relaxRelTol);
+    [oscillate stagnate] = detectNewtonOscillations(meta.res_history, system.options.cellwise, meta.iteration, system.options.nonlinear.relaxRelTol);
     if ~ linsolver_diverged,
         if oscillate
-            meta.relax = max(meta.relax - system.nonlinear.relaxInc, system.nonlinear.relaxMax);
+            meta.relax = max(meta.relax - system.options.nonlinear.relaxInc, system.options.nonlinear.relaxMax);
             dispif(mrstVerbose, ...
                   ['Oscillating behavior detected: Relaxation set ', ...
                    'to %.1g\n'], meta.relax);
         elseif stagnate && 0
-            meta.relax = max(meta.relax + system.nonlinear.relaxInc, system.nonlinear.relaxMax);
+            meta.relax = max(meta.relax + system.options.nonlinear.relaxInc, system.options.nonlinear.relaxMax);
             dispif(mrstVerbose, ...
                   ['Stagnating behavior detected: Relaxation set ', ...
                    'to %.1g\n'], meta.relax);
