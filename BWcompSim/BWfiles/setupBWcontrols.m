@@ -51,10 +51,10 @@ bc.in.Eg=bc.in.pressure/(bc.in.Zgas_vap*R*bc.in.fluid.Temp);
 bc.in.Eo=bc.in.pressure/(bc.in.Zgas_liq*R*bc.in.fluid.Temp); 
 
 for ic=1:nComp
-    bc.in.C_influx(ic)=influx_rate*(bc.in.Xiv(ic)*bc.in.vapor_frac+bc.in.Eo*(1-bc.in.vapor_frac)); %Mols/sec
+    bc.in.C_influx(ic)=influx_rate*(bc.in.Xiv(ic)*bc.in.vapor_frac+bc.in.Xil(ic)*(1-bc.in.vapor_frac)); %Mols/sec
 end
 
-bc.in.T_influx(ic)=influx_rate*(bc.in.Eg*bc.in.vapor_frac+bc.in.Xil(ic)*(1-bc.in.vapor_frac)); %Mols/sec
+bc.in.T_influx=influx_rate*(bc.in.Eg*bc.in.vapor_frac+bc.in.Eo*(1-bc.in.vapor_frac)); %Mols/sec
 
 bc.in.water_influx=influx_rate/system.mv_water; %Mols/sec: (m^3/s * mol/m^3)
 end

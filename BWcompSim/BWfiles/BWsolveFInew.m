@@ -151,7 +151,7 @@ state.Ew=Ew;
       % We compute the residual values by calling |getResiduals|.
       % This function detects oscillation and stagnation
       
-      [meta, residuals] = getResiduals(meta, eqs, system, false);
+      [meta, residuals] = BWgetResiduals(meta, eqs, system, false);
 
       %%
       % We test for convergence. Here we use a very stringent test given by a max norm
