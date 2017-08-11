@@ -6,9 +6,11 @@
    function eqs=BWeqAssembler(tstep, iteration, state0,...
        state,bc,system, ops);
    
+  eqs=cell(1,9);
+   
    components=system.components;
    nComp=system.nComp;
-   nPhase=2
+   nPhase=2;
    rock=system.rock;
    dt=system.options.dt;
    dz=ops.dz;

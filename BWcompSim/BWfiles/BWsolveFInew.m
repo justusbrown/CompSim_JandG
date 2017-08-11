@@ -51,7 +51,7 @@ function [state, conv] = BWsolveFInew(tstep, system, ops, state0, bc, ...
       meta.iteration = meta.iteration + 1;
       
       init_F=state.F;
-      init_Zi=state.Zi
+      init_Zi=state.Zi;
       for i=1:nCell
           totalFluid(i).pressure=state.p(i);
           totalFluid(i).Sw=state.Sw(i);
@@ -92,10 +92,16 @@ function [state, conv] = BWsolveFInew(tstep, system, ops, state0, bc, ...
         state.V=V;
         
         totalFluid(i).Eo=totalFluid(i).pressure/(Zgas_liq*R*totalFluid(i).Temp); %ALREADY Added to each cell
+        if isnan(totalFluid(i).Eo)
+            totalFluid(i).Eo=0;
+        end
         Eo=[Eo;totalFluid(i).Eo];
         state.Eo=Eo;
 
         totalFluid(i).Eg=totalFluid(i).pressure/(Zgas_vap*R*totalFluid(i).Temp); %ALREADY Added to each cell
+        if isnan(totalFluid(i).Eg)
+            totalFluid(i).Eg=0;
+        end
         Eg=[Eg;totalFluid(i).Eg];
         state.Eg=Eg;
         
