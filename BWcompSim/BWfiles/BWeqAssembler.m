@@ -108,8 +108,8 @@ fluxC=cell(nComp,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
     %end
     
     for ic = 1 : nComp
-       bc_valG = bd.Xig(ic).*bc_mobG;
-       bc_valL= bd.Xio(ic).*bc_mobL; 
+       bc_valG = bd.Xig(ic).*bc_mobG.*bd.Eg;
+       bc_valL= bd.Xio(ic).*bc_mobL.*bd.Eo; 
        valL=state.Xio{ic}.*mobL.*state.Eo;
        valG=state.Xig{ic}.*mobG.*state.Eg;
        fluxL{ic} = faceConcentrations(upC{1}, valL, bc_valL); %THESE Xi VALUES ARE FOR CELL 1 AND NEED TO BE FIXED

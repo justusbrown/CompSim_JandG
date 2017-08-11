@@ -48,7 +48,7 @@ end
 
 for i=1:nCell    
     
-[success_flag,stability_flag,Xiv,Xil,Zgas_vap,Zgas_liq,vapor_frac,cubic_time]=GI_flash(totalFluid(i), thermo,options);
+[success_flag,stability_flag,Xiv,Xil, vapor_frac, Zgas_vap,Zgas_liq,cubic_time]=GI_flash(totalFluid(i), thermo,options);
 
 totalFluid(i).Xig=Xiv; %4 components. units=MOLig/MOLg
 Xig=[Xig;totalFluid(i).Xig];
@@ -122,7 +122,7 @@ totalFluid(i).F=(totalFluid(i).Eo.*totalFluid(i).So+totalFluid(i).Eg.*totalFluid
 F=[F;totalFluid(i).F];
 state.F=F;
 
-totalFluid(i).Ew=55.5; 
+totalFluid(i).Ew=55.5/system.litre; 
 Ew=[Ew;totalFluid(i).Ew];
 state.Ew=Ew;
 

@@ -34,7 +34,7 @@ bc.dirichlet.Zi=bc.dirichlet.Xig.*bc.dirichlet.V+bc.dirichlet.Xio.*(1-bc.dirichl
 bc.dirichlet.Eo=bc.dirichlet.pressure/(Zgas_liq*R*bc.dirichlet.fluid.Temp); 
 bc.dirichlet.Eg=bc.dirichlet.pressure/(Zgas_vap*R*bc.dirichlet.fluid.Temp); 
 bc.dirichlet.F=bc.dirichlet.Eo*bc.dirichlet.So+bc.dirichlet.Eg*bc.dirichlet.Sg;
-bc.dirichlet.Ew=55.5; %CORRELLATION
+bc.dirichlet.Ew=55.5/system.litre; %CORRELLATION
 
 %%
 %Setup the Neumann condition (influx)
@@ -51,7 +51,7 @@ bc.in.Eg=bc.in.pressure/(bc.in.Zgas_vap*R*bc.in.fluid.Temp);
 bc.in.Eo=bc.in.pressure/(bc.in.Zgas_liq*R*bc.in.fluid.Temp); 
 
 for ic=1:nComp
-    bc.in.C_influx(ic)=influx_rate*(bc.in.Xiv(ic)*bc.in.vapor_frac+bc.in.Xil(ic)*(1-bc.in.vapor_frac)); %Mols/sec
+    bc.in.C_influx(ic)=influx_rate*(bc.in.Xiv(ic)*bc.in.Eg*bc.in.vapor_frac+bc.in.Xil(ic)*bc.in.Eo*(1-bc.in.vapor_frac)); %Mols/sec
 end
 
 bc.in.T_influx=influx_rate*(bc.in.Eg*bc.in.vapor_frac+bc.in.Eo*(1-bc.in.vapor_frac)); %Mols/sec

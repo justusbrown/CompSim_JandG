@@ -1,4 +1,4 @@
-function [state, conv] = BWsolveFI(tstep, system, ops, state0, bc, ...
+function [state, conv] = BWsolveFInew(tstep, system, ops, state0, bc, ...
           equation);
       
       [components, dt, dz, p_grad, div, faceConcentrations]=deal(system.components,...
@@ -50,15 +50,17 @@ function [state, conv] = BWsolveFI(tstep, system, ops, state0, bc, ...
       % Save iteration number in meta info
       meta.iteration = meta.iteration + 1;
       
-      
-  if meta.iteration ~= 1 || tstep ~= 1   
+      init_F=state.F;
+      init_Zi=state.Zi
       for i=1:nCell
           totalFluid(i).pressure=state.p(i);
           totalFluid(i).Sw=state.Sw(i);
           totalFluid(i).F=state.F(i);
           totalFluid(i).Zi=[state.Zi{1}(i), state.Zi{2}(i), ...
               state.Zi{3}(i), state.Zi{4}(i), state.Zi{5}(i), state.Zi{6}(i)];
+          totalFluid(i).Zi=mynormalize(abs(totalFluid(i).Zi));
       end
+
       state.totalFluid=totalFluid;
       
       Xig=[]; %units=MOLig/MOLg
@@ -69,11 +71,12 @@ function [state, conv] = BWsolveFI(tstep, system, ops, state0, bc, ...
       Ew=[]; 
       rhoL=[];
       rhoG=[];
+      Zi=[];
       
       for i=1:nCell
       
-      [success_flag,stability_flag,Xiv,Xil,Zgas_vap,Zgas_liq,vapor_frac,cubic_time]=GI_flash(totalFluid(i), thermo,options);
-
+      [success_flag,stability_flag,Xiv,Xil, vapor_frac, Zgas_vap,Zgas_liq,cubic_time]=GI_flash(totalFluid(i), thermo,options);
+      
         totalFluid(i).Xig=Xiv; %units=MOLig/MOLg
         Xig=[Xig;totalFluid(i).Xig];
         state.Xig=Xig;
@@ -103,9 +106,15 @@ function [state, conv] = BWsolveFI(tstep, system, ops, state0, bc, ...
         totalFluid(i).rhoG=totalFluid(i).Eg*sum(MW'.*totalFluid(i).Xig);
         rhoG=[rhoG; totalFluid(i).rhoG];
         state.rhoG=rhoG;
+        
+        totalFluid(i).Zi=totalFluid(i).Xig.*totalFluid(i).V+totalFluid(i).Xio.*(1-totalFluid(i).V); %ALREADY Added to each cell
+        Zi=[Zi;totalFluid(i).Zi];
+        state.Zi=Zi;
+        state.Zi=num2cell(state.Zi,1);
+        totalFluid(i).mole_fraction=Zi;
       end
       
-  end
+
 
       state.totalFluid=totalFluid;
       

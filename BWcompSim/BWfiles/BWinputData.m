@@ -136,8 +136,8 @@ system.p_ref = 1*atm;      % Reference pressure
 mmH  = 1.00794*gram;  % molar mass of Hydrogen
 mmO  = 15.9994*gram;  % molar mass of Oxygen
 mmW = 2*mmH + mmO;  % molar mass of H20
-litre = 1e-3*meter^3;
-rho = 1*kilogram/litre;
+system.litre = 1e-3*meter^3;
+rho = 1*kilogram/system.litre;
 system.mv_water=mmW/rho;
 
 
