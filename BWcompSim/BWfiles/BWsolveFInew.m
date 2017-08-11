@@ -21,7 +21,7 @@ function [state, conv] = BWsolveFI(tstep, system, ops, state0, bc, ...
    fprintf('%13s%-26s%-36s\n', '', 'CNV (oil, water)', 'MB (oil, water)');
    
 
-   equation = @(state) equation(tstep, meta.iteration, components, rock, state0, state, dt, bc,dz,p_grad,div,faceConcentrations, system);
+   equation = @(state) equation(tstep, meta.iteration, state0, state, bc, system, ops);
    flash=@(fluid) GI_flash(fluid,thermo,options);
    totalFluid=state.totalFluid;
    R=thermo.R;

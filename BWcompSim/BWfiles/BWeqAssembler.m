@@ -3,8 +3,18 @@
    %THE MAIN VARIABLESARE P,F, Zi, Sw So MAKE ADI VARIABLES
    %
    
-   function eqs=BWeqAssembler(tstep, iteration, component, nComp, rock, state0,...
-       state,dt,bc,dz,p_grad,div,faceConcentrations, system);
+   function eqs=BWeqAssembler(tstep, iteration, state0,...
+       state,bc,system, ops);
+   
+   components=system.components;
+   nComp=system.nComp;
+   rock=system.rock;
+   dt=system.options.dt;
+   dz=ops.dz;
+   p_grad=ops.p_grad;
+   div=ops.div;
+   faceConcentrations=ops.faceConcentrations;
+   
 
 %%   
        opt = struct('Verbose',     mrstVerbose,...
