@@ -1,5 +1,5 @@
  
-function [ops]=setupBWsystem(system, bc);
+function [ops, T]=setupBWsystem(system, bc);
    rock=system.rock
    cf = rock.G.cells.faces(:,1);
    nf = rock.G.faces.num;
@@ -9,6 +9,7 @@ function [ops]=setupBWsystem(system, bc);
    % Compute the half, and then the full, transmissibilities.
    T=rock.T;
    T  = 1 ./ accumarray(cf, 1./T, [nf, 1]);
+   
    
    %%
    %Setup the discrete divergence operator.

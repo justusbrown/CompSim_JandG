@@ -8,6 +8,7 @@
    
    components=system.components;
    nComp=system.nComp;
+   nPhase=2
    rock=system.rock;
    dt=system.options.dt;
    dz=ops.dz;
@@ -87,26 +88,42 @@ MW=vertcat(components.MW);
 rhoL=state.rhoL;
 rhoG=state.rhoG;
 
+fz=rock.G.faces.centroids(:,3);
+drhoL=ops.grad(rhoL, fz);
+drhoG=ops.grad(rhoG, fz);
+
 dpC = cell(1,2); %2 is the number of phases and this will be changed/fixed
 upC = cell(1,2);
-dpC{1}=p_grad(p) - g*(rhoL.*dz);
-dpC{2}=p_grad(p) - g*(rhoG.*dz);
-for phase = 1:2
+dpC{1}=p_grad(p) - g*(drhoL.*dz);
+dpC{2}=p_grad(p) - g*(drhoG.*dz);
+for phase = 1:nPhase
     upC{phase} = (double(dpC{phase})>=0);
 end
     dpC=dpC'; upC=upC';
     dpW = p_grad(p) - g*(rhoW.*dz); %COMPONENT 4 IS WATER< I PLAN ON MAKING A FUNCTION THAT REGISTERS WHICH COMPONENTS ARE WHICH SO WE CAN TYPE THEM IN BY NAME INSTEAD
     upW  = (double(dpW)>=0);
 
-
-fluxC=cell(nComp_C,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
+fluxL=cell(nComp,1);
+fluxG=cell(nComp,1);
+fluxC=cell(nComp,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
 
        %%
        %COMPUTE COMPONENT FLOW RESIDUAL
-    for ic = 1 : nComp_C
-       bc_val = bd.Xig(ic).*bc_mobG + bd.Xio(ic).*bc_mobL; 
-       fluxC{ic} = faceConcentrations(upC{ic}, state.Xig{ic}.*mobG.*state.Eg + state.Xio{ic}.*mobL.*state.Eo, bc_val); %THESE Xi VALUES ARE FOR CELL 1 AND NEED TO BE FIXED
-       eqs{ic} = (rock.pv/dt).*(F.*Zi{ic}-F0.*Zi0{ic})+ div(fluxC{ic}.*rock.T.*dpC{ic});
+  %  for ic = 1 : nComp
+   %    bc_val = bd.Xig(ic).*bc_mobG + bd.Xio(ic).*bc_mobL; 
+    %   fluxC{ic} = faceConcentrations(upC{ic}, state.Xig{ic}.*mobG.*state.Eg + state.Xio{ic}.*mobL.*state.Eo, bc_val); %THESE Xi VALUES ARE FOR CELL 1 AND NEED TO BE FIXED
+     %  eqs{ic} = (rock.pv/dt).*(F.*Zi{ic}-F0.*Zi0{ic})+ div(fluxC{ic}.*rock.T.*dpC{ic});
+    %end
+    
+    for ic = 1 : nComp
+       bc_valG = bd.Xig(ic).*bc_mobG
+       bc_valL= bd.Xio(ic).*bc_mobL; 
+       valL=state.Xio{ic}.*mobL.*state.Eo
+       valG=state.Xig{ic}.*mobG.*state.Eg
+       fluxL{ic} = faceConcentrations(upC{1}, valL, bc_valL); %THESE Xi VALUES ARE FOR CELL 1 AND NEED TO BE FIXED
+       fluxG{ic}= faceConcentrations(upC{2}, valG, bc_valG);
+       fluxC{ic}=fluxL{ic}.*dpC{1}+fluxG{ic}.*dpC{2};
+       eqs{ic} = (rock.pv/dt).*(F.*Zi{ic}-F0.*Zi0{ic})+ div(fluxC{ic}.*rock.T);
     end
     
     %%
@@ -114,29 +131,29 @@ fluxC=cell(nComp_C,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
     %NEED TO DEFINE mobW and Bc_mobW
     bc_val = bd.Ew.*bc_mobW;
     fluxW = faceConcentrations(upW, state.Ew.*mobW, bc_val);%NEED TO ADD IN SETUPCONTROLS
-    eqs{nComp_C + 1} = (rock.pv/dt).*(Ew.*Sw - Ew0.*Sw0) + div(fluxW.*rock.T.*dpW);
+    eqs{nComp + 1} = (rock.pv/dt).*(Ew.*Sw - Ew0.*Sw0) + div(fluxW.*rock.T.*dpW);
 
     
     %%
     %COMPUTE THE GLOBAL FLOW RESIDUAL
     bc_val = bd.Eg.*bc_mobG + bd.Eo.*bc_mobL; 
     fluxT = faceConcentrations(upC_total, state.Eg.*mobG + state.Eo.*mobL, bc_val);
-    eqs{nComp_C+2}=(rock.pv/dt).*(F-F0)+div(fluxT.*rock.T.*dpC_total); %THE SECOND TERM IS SAME AS FOR INDIVIDUAL COMPONENTS. THIS MUST CHANGE
+    eqs{nComp+2}=(rock.pv/dt).*(F-F0)+div(fluxT.*rock.T.*dpC_total); %THE SECOND TERM IS SAME AS FOR INDIVIDUAL COMPONENTS. THIS MUST CHANGE
     %DONE COMPUTING GLOBAL FLOW EQ
     
     %%
     %COMPUTE THE SATURATION RESIDUAL EQUATION
-    eqs{nComp_C+3}=(F)*((1-state.V)/(state.Eo)+(state.V)/(state.Eg))+(Sw)-1;
+    eqs{nComp+3}=(F)*((1-state.V)/(state.Eo)+(state.V)/(state.Eg))+(Sw)-1;
     %DONE COMPUTING THE RESIDUAL FOR SATURATION
 
         
     %%
     %ADD INPUT FLUX
-    for ic = 1 : nComp_C
+    for ic = 1 : nComp
        eqs{ic}(bc.in.influx_cells) = eqs{ic}(bc.in.influx_cells) - bc.in.C_influx(ic);
     end
-    eqs{nComp_C + 1}(bc.in.influx_cells) = eqs{nComp_C + 1}(bc.in.influx_cells) - bc.in.water_influx;
-    eqs{nComp_C + 2}(bc.in.influx_cells) = eqs{nComp_C + 2}(bc.in.influx_cells) - bc.in.T_influx;
+    eqs{nComp + 1}(bc.in.influx_cells) = eqs{nComp + 1}(bc.in.influx_cells) - bc.in.water_influx;
+    eqs{nComp + 2}(bc.in.influx_cells) = eqs{nComp + 2}(bc.in.influx_cells) - bc.in.T_influx;
    
    end
    

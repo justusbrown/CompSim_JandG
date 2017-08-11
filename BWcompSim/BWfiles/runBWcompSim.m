@@ -14,8 +14,8 @@ bc=setupBWcontrols(system);
 
 %%
 %Setup the system/operators
-ops=setupBWsystem(system,bc);
-
+[ops, T]=setupBWsystem(system,bc);
+system.rock.T=T;
 %%
 %Initialize the state
 [state0]=initBWstate(system);

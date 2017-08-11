@@ -1,7 +1,4 @@
-%THIS IS PART OF SETTING UP THE GRADIENT OPERATOR. BravoDome uses C in the
-%gradient, I think we will probably supposed to be using Fzi. This might
-%need changing gr 07/20
-%NEVERMIND, C is    C = C1_interior + C1_exterior - (C2_interior + C2_exterior);
+%C is    C = C1_interior + C1_exterior - (C2_interior + C2_exterior);
 %gr 07/20
 
 %grad_JandG function
