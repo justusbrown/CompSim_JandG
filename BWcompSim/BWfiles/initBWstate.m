@@ -90,13 +90,13 @@ totalFluid(i).Eg=totalFluid(i).pressure/(Zgas_vap*R*totalFluid(i).Temp); %ALREAD
 Eg=[Eg;totalFluid(i).Eg];
 state.Eg=Eg;
 
-totalFluid(i).rhoL=totalFluid(i).Eo*sum(MW.*totalFluid(i).Xio);
+totalFluid(i).rhoL=totalFluid(i).Eo*sum(MW'.*totalFluid(i).Xio);
 rhoL=[rhoL; totalFluid(i).rhoL];
 state.rhoL=rhoL;
 
-totalFluid(i).rhoG=totalFluid(i).Eg*sum(MW.*totalFluid(i).Xig);
-rhoG=[rhoG; totalFluid(i).rhoG];
-state.rhoG=rhoG;
+%totalFluid(i).rhoG=totalFluid(i).Eg*sum(MW'.*totalFluid(i).Xig);
+%rhoG=[rhoG; totalFluid(i).rhoG];
+%state.rhoG=rhoG;
 
 %totalFluid(i).rhoLi=totalFluid(i).pressure.*MW/(Zgas_liq*R*totalFluid(i).Temp);
 %rhoLi=[rhoLi;totalFluid(i).rhoLi];
