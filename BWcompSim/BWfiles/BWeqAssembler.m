@@ -31,7 +31,6 @@
    %p_ref =system.p_ref;      
    p_ref=1*atm; %Having problems with 'system' its deleting itself somewhere before solveFi
  %%  
-   if tstep~=1 & meta.iteration~=1
   
    Ew=state.Ew
    
@@ -42,14 +41,7 @@
 
 [p, F, Zi{:}, Sw]=initVariablesADI(state.p, state.F, state.Zi{:}, state.Sw);
    
-   else
-      
-   Ew=state.Ew;
-   p=state.p;
-   F=state.F;
-   Zi=state.Zi;
-   Sw=state.Sw
-  
+
 
    F0=state0.F;
    Zi0=state0.Zi;
@@ -136,9 +128,14 @@ fluxC=cell(nComp,1); %AGAIN, ONLY CELL BECAUSE BRAVO DOME DOES THAT WAY
     
     %%
     %COMPUTE THE GLOBAL FLOW RESIDUAL
-    bc_val = bd.Eg.*bc_mobG + bd.Eo.*bc_mobL; 
-    fluxT = faceConcentrations(upC_total, state.Eg.*mobG + state.Eo.*mobL, bc_val);
-    eqs{nComp+2}=(rock.pv/dt).*(F-F0)+div(fluxT.*rock.T.*dpC_total); %THE SECOND TERM IS SAME AS FOR INDIVIDUAL COMPONENTS. THIS MUST CHANGE
+    bc_valTL = bd.Eo.*bc_mobL; 
+    bc_valTG=bd.Eg.*bc_mobG; 
+    valTL=state.Eo.*mobL;
+    valTG=state.Eg.*mobG;
+    fluxTL=faceConcentrations(upC{1}, valTL, bc_valTL);
+    fluxTG=faceConcentrations(upC{2}, valTG, bc_valTG);
+    fluxT = fluxTL.*dpC{1}+fluxTG.*dpC{2};
+    eqs{nComp+2}=(rock.pv/dt).*(F-F0)+div(fluxT.*rock.T); %THE SECOND TERM IS SAME AS FOR INDIVIDUAL COMPONENTS. THIS MUST CHANGE
     %DONE COMPUTING GLOBAL FLOW EQ
     
     %%
