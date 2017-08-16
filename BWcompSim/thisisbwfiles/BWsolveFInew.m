@@ -132,7 +132,7 @@ function [state, conv] = BWsolveFInew(tstep, system, ops, state0, bc, ...
        state.totalFluid=totalFluid;  
        eqs = equation(state);    
        dx = SolveEqsADI(eqs, []);
-       state      = updateBWstate(state, dx, system.nComp);
+       state      = updateBWstate(state, dx, system);
        
         %%
       % We compute the residual values by calling |getResiduals|.
