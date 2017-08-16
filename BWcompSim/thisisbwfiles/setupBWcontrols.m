@@ -52,9 +52,6 @@ for ic=1:nComp
     bc.in.C_influx(ic)=influx_rate*(bc.in.Xiv(ic)*bc.in.Eg + bc.in.Xil(ic)*bc.in.Eo); %Mols/sec
 end
 
-bc.in.T_influx=influx_rate*(bc.in.Eg + bc.in.Eo);
-%(bc.in.Eg*bc.in.vapor_frac+bc.in.Eo*(1-bc.in.vapor_frac)); %Mols/sec
-
 
 bc.in.water_influx=influx_rate*bc.in.Ew; %Mols/sec: (m^3/s * mol/m^3)
 %bc.in.water_influx=influx_rate/system.mv_water; 

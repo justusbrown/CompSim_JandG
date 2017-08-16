@@ -114,8 +114,7 @@ for ic = 1 : nComp
        eqs{ic}(bc.in.influx_cells) = eqs{ic}(bc.in.influx_cells) - bc.in.C_influx(ic);
 end
     eqs{nComp + 1}(bc.in.influx_cells) = eqs{nComp + 1}(bc.in.influx_cells) - bc.in.water_influx;
-    %THIS ISN'T ONE ANYMORE? JB 8/15
-    %eqs{nComp + 2}(bc.in.influx_cells) = eqs{nComp + 2}(bc.in.influx_cells) - bc.in.T_influx;
+
    
 end
 
