@@ -87,15 +87,15 @@ for ic = 1 : nComp
    bc_valL= bd.Xio(ic).*bc_mobL.*bd.Eo; 
    valL=state.Xio{ic}.*mobL.*state.Eo;
    valG=state.Xig{ic}.*mobG.*state.Eg;
-   fluxL{ic} = BWfaceConcentrations(upC{1}, valL, bc_valL);% CHANGED TO BWFACECONCENTRATIONS
-   fluxG{ic}= BWfaceConcentrations(upC{2}, valG, bc_valG);
+   fluxL{ic} = faceConcentrations(upC{1}, valL, bc_valL);% CHANGED TO BWFACECONCENTRATIONS
+   fluxG{ic}= faceConcentrations(upC{2}, valG, bc_valG);
    fluxC{ic}=fluxL{ic}.*dpC{1}+fluxG{ic}.*dpC{2};
    eqs{ic} = (rock.pv/dt).*(m_i{ic}-m_i0{ic})+ div(fluxC{ic}.*rock.T);
 end
 
 %%Compute the water flow residual
 bc_val = bd.Ew.*bc_mobW;
-fluxW = BWfaceConcentrations(upW, state.Ew.*mobW, bc_val);%NEED TO ADD IN SETUPCONTROLS
+fluxW = faceConcentrations(upW, state.Ew.*mobW, bc_val);%NEED TO ADD IN SETUPCONTROLS
 eqs{nComp + 1} = (rock.pv/dt).*(m_w - m_w0) + div(fluxW.*rock.T.*dpW);
 
 %%Compute the saturation residual 
