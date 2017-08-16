@@ -17,7 +17,7 @@ function state = updateBWstate(state, dx, nComp);
    state.p = state.p + step*dp;
    state.m_w=state.m_w + step*dm_w;
    for ic = 1 : nComp
-      state.m_i{ic} = state.m_i{ic} + step*dn_i{ic}; % max(0, state.Zi{ic} + step*dZi{ic});
+      state.m_i{ic} = state.m_i{ic} + step*dm_i{ic}; % max(0, state.Zi{ic} + step*dZi{ic});
       %NOT SURE WE NEED MAX HERE
    end
  
