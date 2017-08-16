@@ -32,9 +32,10 @@ function eqs = BWeqAssembler(state0, state, bc, system, ops)
  [p, m_i{:}, m_w]=initVariablesADI(state.p, state.m_i{:}, state.m_w);
  
  %ADDED THIS!!!!! JB 8/15
- for k=1:nComp
- m_isum =+ m_i{k}.val; %assuming constant for each cell
+ for i=1:system.nCell
+ m_iSum(i) = m_i{1}(i) + m_i{2}(i) + m_i{3}(i) + m_i{4}(i) + m_i{5}(i) + m_i{6}(i) ; %assuming constant for each cell
  end
+ m_iSum=m_iSum(:)';
  
  %Finite Difference Variables
  m_i0=state0.m_i;
@@ -106,7 +107,7 @@ eqs{nComp + 1} = (rock.pv/dt).*(m_w - m_w0) + div(fluxW.*rock.T.*dpW);
 %%Compute the saturation residual 
 %THE WAY IT WAS:eqs{nComp+3}=state.m_sum*(1-state.V)/state.Eo + state.m_sum*state.V/state.Eg + m_w/state.Ew-1;
 %CHANGED THIS, MAY BE COMPLETE GARBAGE JB 8/15
-eqs{nComp+2}=m_isum.*(1-state.V)./state.Eo + m_isum.*state.V./state.Eg + m_w./state.Ew-1;
+eqs{nComp+2}=m_iSum.*(1-state.V)./state.Eo + m_iSum.*state.V./state.Eg + m_w./state.Ew-1;
 
 %%Add the input fluxes
 for ic = 1 : nComp
