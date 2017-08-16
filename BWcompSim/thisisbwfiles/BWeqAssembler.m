@@ -15,10 +15,9 @@ function eqs = BWeqAssembler(state0, state, bc, system, ops)
    p_grad=ops.p_grad;
    div=ops.div;
    faceConcentrations=ops.faceConcentrations;
-   nEqs=nComp+2;
 
 %Clear/initialize the eqs variables
-  eqs=cell(1,nEqs);
+  eqs=cell(1,nComp+2);
   
  %Viscosities will not be here in final
    muL=1e-3;
@@ -36,7 +35,7 @@ function eqs = BWeqAssembler(state0, state, bc, system, ops)
  m_i0=state0.m_i;
  m_w0=state0.m_w;
  
-  %% Setup the flux terms   
+  %% Setup the flux terms   %HOW DID YOU GET THIS BOLDED?
 [krL,krG]=BWquadraticRelPerm(state.So);
 bd=bc.dirichlet;
 [bc_krL, bc_krG] = BWquadraticRelPerm(bd.So);
@@ -65,7 +64,8 @@ rhoG=state.rhoG;
 fz=rock.G.faces.centroids(:,3);
 drhoL=ops.grad(rhoL, fz);
 drhoG=ops.grad(rhoG, fz);
- 
+
+
 dpC = cell(1,2);
 upC = cell(1,2);
 dpC{1}=p_grad(p) - g*(drhoL.*dz);
@@ -87,15 +87,15 @@ for ic = 1 : nComp
    bc_valL= bd.Xio(ic).*bc_mobL.*bd.Eo; 
    valL=state.Xio{ic}.*mobL.*state.Eo;
    valG=state.Xig{ic}.*mobG.*state.Eg;
-   fluxL{ic} = faceConcentrations(upC{1}, valL, bc_valL);
-   fluxG{ic}= faceConcentrations(upC{2}, valG, bc_valG);
+   fluxL{ic} = BWfaceConcentrations(upC{1}, valL, bc_valL);% CHANGED TO BWFACECONCENTRATIONS
+   fluxG{ic}= BWfaceConcentrations(upC{2}, valG, bc_valG);
    fluxC{ic}=fluxL{ic}.*dpC{1}+fluxG{ic}.*dpC{2};
    eqs{ic} = (rock.pv/dt).*(m_i{ic}-m_i0{ic})+ div(fluxC{ic}.*rock.T);
 end
 
 %%Compute the water flow residual
 bc_val = bd.Ew.*bc_mobW;
-fluxW = faceConcentrations(upW, state.Ew.*mobW, bc_val);%NEED TO ADD IN SETUPCONTROLS
+fluxW = BWfaceConcentrations(upW, state.Ew.*mobW, bc_val);%NEED TO ADD IN SETUPCONTROLS
 eqs{nComp + 1} = (rock.pv/dt).*(m_w - m_w0) + div(fluxW.*rock.T.*dpW);
 
 %%Compute the saturation residual 

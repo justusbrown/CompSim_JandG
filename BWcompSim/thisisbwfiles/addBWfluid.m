@@ -12,7 +12,7 @@ for i=1:nCell
     totalFluid(i).mole_fraction = mole_fraction;
     totalFluid(i).pressure=Cells.pressure(i);
     totalFluid(i).Temp=Temp;
-    totalFluid(i).m_i=m_i;
+    totalFluid(i).m_i=m_i; %THIS IS USER DEFINED?
 end
 totalFluid=totalFluid';
 end

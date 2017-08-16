@@ -16,6 +16,7 @@ muG=1e-5;
 cl    = system.cl;  % Compressibility
 p_ref = system.p_ref;       % Reference pressure
 
+%THE USER DEFINES THE INITIAL ZI, NOT MI? JB 8/15
 for i=1:nCell
     totalFluid(i).Zi=totalFluid(i).mole_fraction;
 end
@@ -36,11 +37,21 @@ m_i=[];
 
 
 for i=1:nCell    
-    [success_flag,stability_flag,Xiv,Xil, vapor_frac, Zgas_vap,Zgas_liq,cubic_time]=GI_flash(totalFluid(i), thermo,options);
-
-    m_i=[m_i; totalFluid(i).m_i];
+    %{
+    CAN WE DO THIS INSTEAD? THIS MAY BE RETARDED BUT JUST A THOUGHT
+    m_i=[m_i; totalFluid(i).m_i]; %IS THIS USER DEFINED IN ADD BW FLUID? DO
+    WE NEED BOTH THIS AND ZI?
     state.m_i=m_i;
     state.m_i=num2cell(state.m_i,1);
+    totalFluid(i).Zi=totalFluid(i).m_i./sum(totalFluid(i).m_i);
+    %}
+    
+    [success_flag,stability_flag,Xiv,Xil, vapor_frac, Zgas_vap,Zgas_liq,cubic_time]=GI_flash(totalFluid(i), thermo,options);
+
+    m_i=[m_i; totalFluid(i).m_i]; %IS THIS USER DEFINED IN ADD BW FLUID? DO WE NEED BOTH THIS AND ZI (CAN WE DO THE ABOVE INSTEAD?)
+    state.m_i=m_i;
+    state.m_i=num2cell(state.m_i,1);
+
     
     totalFluid(i).Xig=Xiv; %4 components. units=MOLig/MOLg
     Xig=[Xig;totalFluid(i).Xig];
