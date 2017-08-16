@@ -56,8 +56,12 @@ function [state, conv] = BWsolveFInew(tstep, system, ops, state0, bc, ...
       for i=1:nCell
           totalFluid(i).pressure=state.p(i);
           totalFluid(i).m_w=state.m_w(i);
-          totalFluid(i).m_i=[state.m_i{1}(i), state.m_i{2}(i), ...
-              state.m_i{3}(i), state.m_i{4}(i), state.m_i{5}(i), state.m_i{6}(i)];
+          %CAN I MAKE THIS ANOTHER FOR LOOP, NOT THINKING SUPER WELL (I THINK THAT THIS WORKS)?
+          for j=1:nComp
+          totalFluid(i).m_i = state.m_i{j}(i);
+          end
+          %totalFluid(i).m_i=[state.m_i{1}(i), state.m_i{2}(i), ...
+              %state.m_i{3}(i), state.m_i{4}(i), state.m_i{5}(i), state.m_i{6}(i)];
       end
       
       totalFluid(i).Zi=totalFluid(i).m_i./sum(totalFluid(i).m_i);
