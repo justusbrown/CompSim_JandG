@@ -19,9 +19,9 @@ system=struct();
 G = cartGrid([10, 10, 4]); %CHANGED!!!!
 G = computeGeometry(G);
 %%Enter the permeability
-rock.perm=repmat(50*milli*darcy, [G.cells.num, 1]);
+rock.perm=repmat(100*milli*darcy, [G.cells.num, 1]);
 %%Enter the porosity
-rock.poro = repmat(0.1, [G.cells.num,1]);
+rock.poro = repmat(0.13, [G.cells.num,1]);
 rock.pv=poreVolume(G,rock);
 rock.T=computeTrans(G,rock);
 rock.G=G
@@ -60,6 +60,7 @@ system.influx_rate = 1000/day
 %KEPT IT AS THEIR UNITS
 system.Temp=((160-32)*(5/9))+273.15;
 system.thermo=addThermo();
+%EOS=PR; lol
 system.thermo.EOS=@PREOS;
 system.thermo.vp_water=BWvaporPressure(system.Temp);
 system.thermo.R=8.3145;
@@ -99,18 +100,20 @@ outfluxFluid.Zi=[0.5,0.03,0.07,0.2,0.15,0.05];
 %%COMPONENTS ENTERED
 
 %%
-%NEW!!!!!!!! COMMENTED OUT BECAUSE WE DON'T HAVE ANYTHING CALLED FLUID
+
 %CRITICAL PROPERTIES
-%CHANGE THIS TO WHATEVER STRUCT THIS NEEDS TO BE
-%NOT SURE ABOUT THESE UNITS YET
-%fluid.component.Pcrit=[667.8,616.3,436.9,304.0,200.0,162.0]
-%fluid.component.Tcrit=[343.0,665.7,913.4,1011.8,1270.0,1380.0]
-%fluid.component.Zcrit=[.290,.277,.264,.257,.245,.235]
+system.component.Pcrit=[1071.33111,492.31265,667.78170,708.34238,618.69739,514.92549,410.74956,247.56341,160.41589]*psia;
+system.component.Tcrit=[548.46000,227.16000,343.08000,549.77400,665.64000,806.54054,838.11282,1058.03863,1291.89071]*Rankine;
+system.component.Zcrit=[0.27408,0.29115,0.28473,0.28463,0.27748,0.2764,0.2612,0.22706,0.20137];
 %%
-%NEW!!!!!!!
-%fluid.component.AcenF=[.013,.1524,.3007,.4885,.6500,.8500]
-%fluid.component.MMW=[16.04,44.10,86.18,149.29,206.00,282.00]
+%COMPONENT PROPERTIES
+system.component.AcenFact=[0.225,0.04,0.013,0.0986,0.1524,0.21575,0.3123,0.5567,0.91692];
+system.component.MMW=[16.04,44.10,86.18,149.29,206.00,282.00]*milli;
+system.component.OMEGA_A=[0.4572355,0.4572355,0.534021,0.4572355,0.4572355,0.4572355,0.6373344,0.6373344,0.6373344];
+system.component.OMEGA_B=[0.0777961,0.0777961,0.0777961,0.0777961,0.0777961,0.0777961,0.0872878,0.0872878,0.0872878];
+system.component.refRHO=[48.50653,50.19209,26.53189,34.21053,36.33308,37.87047,45.60035,50.88507,55.89861]*lbm_ft3;
 %%
+
 %%%Enter the nonlinear solver parameters and ***cellwise***
 %
 options.maxIterations=50;
