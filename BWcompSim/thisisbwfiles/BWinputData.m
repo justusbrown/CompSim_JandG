@@ -8,7 +8,7 @@
 
 %FUNCTION inputData
 
-function [system]=inputData()
+function [system]=BWinputData()
 
 system=struct();
 %
@@ -16,7 +16,7 @@ system=struct();
 %%%ENTER THE ROCK DATA
 %
 %%Enter the desired 3x3 grid dimmensions
-G = cartGrid([10, 10, 4]); %CHANGED!!!!
+G = cartGrid([9, 9, 4]); %THEIR GRID CONTAINS TO DIFFERENT LAYERS...
 G = computeGeometry(G);
 %%Enter the permeability
 rock.perm=repmat(100*milli*darcy, [G.cells.num, 1]);
@@ -57,63 +57,47 @@ end
 %Enter the influx  in m^3/s
 system.influx_rate = 1000/day  
 %Enter the temperature in Kelvin
-%KEPT IT AS THEIR UNITS
-system.Temp=((160-32)*(5/9))+273.15;
+system.Temp=(200+460)*Rankine;
 system.thermo=addThermo();
-%EOS=PR; lol
 system.thermo.EOS=@PREOS;
 system.thermo.vp_water=BWvaporPressure(system.Temp);
 system.thermo.R=8.3145;
 
 %%
-%%%ENTER THE COMPONENENTS AND MOLE FRACTIONS FOR INFLUX, OUTFLUX, AND
-%%%INITIAL FLUIDS
-%%NOTE: Here, fluid properties will be input, but for development sake, our
-%%tables will be used
-%
-%Enter all fluid components NEW!!!!!
-[components, comp_flag]=addComponents({'CH4','C3H8','C6H14','C10H22','C15H32','C20H42'});
-system.components=components;
-system.nComp=length(components);
+%ENTER FLUID COMPONENTS
+namecomponents=['CO2', 'N2', 'C1', 'C2', 'C3', 'C4-6', 'C7+1','C7+2', 'C7+3'];
+system.nComp=length(namecomponents);
 
-m_i=[0.35,0.03,0.07,0.2,0.1,0.05];
-Zi=[];
-for ic=1:system.nComp
-Zi=[Zi, m_i(ic)./sum(m_i)];
-end
+%%
 
-%Enter the Initial Fluid's mole fraction
-%mole_fraction=[0.5,0.03,0.07,0.2,0.15,0.05];
+%CRITICAL PROPERTIES
+components.Pc=[1071.33111,492.31265,667.78170,708.34238,618.69739,514.92549,410.74956,247.56341,160.41589]*psia;
+components.Tc=[548.46000,227.16000,343.08000,549.77400,665.64000,806.54054,838.11282,1058.03863,1291.89071]*Rankine;
+components.Zc=[0.27408,0.29115,0.28473,0.28463,0.27748,0.2764,0.2612,0.22706,0.20137];
+%%
+%COMPONENT PROPERTIES
+components.acentric_factor=[0.225,0.04,0.013,0.0986,0.1524,0.21575,0.3123,0.5567,0.91692];
+components.MW=[16.04,44.10,86.18,149.29,206.00,282.00]*milli;
+components.OMEGA_A=[0.4572355,0.4572355,0.534021,0.4572355,0.4572355,0.4572355,0.6373344,0.6373344,0.6373344];
+components.OMEGA_B=[0.0777961,0.0777961,0.0777961,0.0777961,0.0777961,0.0777961,0.0872878,0.0872878,0.0872878];
+components.refRHO=[48.50653,50.19209,26.53189,34.21053,36.33308,37.87047,45.60035,50.88507,55.89861]*lbm_ft3;
+%%
+%ENTER INITIAL MOLE FRACTIONS
+
+Zi=[.01210,.01940,.65990 ,.08690,.05910, .09670,.04745,.01515,.00330];
+m_i=[.01210,.01940,.65990 ,.08690,.05910, .09670,.04745,.01515,.00330];%need to do something here
+
 %Assign the initialFluid to the entire system using addBWfluid
+system.components=components;
 totalFluid=addBWfluid(system, Zi, m_i);
 %Initialize the influx, outflux fluida
 influxFluid=addMixture(system.components,system.Temp,system.influx_p);
 outfluxFluid=addMixture(system.components,system.Temp,system.outflux_p);
 %Enter the Influx Fluid's mole fraction
-%JUST MADE THIS UP NEW!!!!!!a
-influxFluid.Zi=[0.4,0.03,0.17,0.1,0.25,0.05];
-%influxFluid.Temp=influxFluid.temperature;
+influxFluid.Zi=[0.4,0.03,0.17,0.1,0.25,0.05];%NEEDS TO CHANGE JB 8/25
 %Enter the Outflux Fluid's mole fraction
-outfluxFluid.Zi=[0.5,0.03,0.07,0.2,0.15,0.05];
-%outfluxFluid.Temp=outfluxFluid.temperature;
-%%NOTE THAT THE MOLE FRACTION ENTERED CORRESPONDS TO THE ORDER OF
-%%COMPONENTS ENTERED
-
+outfluxFluid.Zi=[0.5,0.03,0.07,0.2,0.15,0.05];%NEEDS TO CHANGE JB 8/25
 %%
-
-%CRITICAL PROPERTIES
-system.component.Pcrit=[1071.33111,492.31265,667.78170,708.34238,618.69739,514.92549,410.74956,247.56341,160.41589]*psia;
-system.component.Tcrit=[548.46000,227.16000,343.08000,549.77400,665.64000,806.54054,838.11282,1058.03863,1291.89071]*Rankine;
-system.component.Zcrit=[0.27408,0.29115,0.28473,0.28463,0.27748,0.2764,0.2612,0.22706,0.20137];
-%%
-%COMPONENT PROPERTIES
-system.component.AcenFact=[0.225,0.04,0.013,0.0986,0.1524,0.21575,0.3123,0.5567,0.91692];
-system.component.MMW=[16.04,44.10,86.18,149.29,206.00,282.00]*milli;
-system.component.OMEGA_A=[0.4572355,0.4572355,0.534021,0.4572355,0.4572355,0.4572355,0.6373344,0.6373344,0.6373344];
-system.component.OMEGA_B=[0.0777961,0.0777961,0.0777961,0.0777961,0.0777961,0.0777961,0.0872878,0.0872878,0.0872878];
-system.component.refRHO=[48.50653,50.19209,26.53189,34.21053,36.33308,37.87047,45.60035,50.88507,55.89861]*lbm_ft3;
-%%
-
 %%%Enter the nonlinear solver parameters and ***cellwise***
 %
 options.maxIterations=50;
@@ -137,7 +121,6 @@ system.totalFluid=totalFluid;
 system.influxFluid=influxFluid;
 system.outfluxFluid=outfluxFluid;
 system.rock=rock;
-system.components=components;
 system.cl=4.4e-5/atm; % Compressibility
 system.p_ref = 1*atm;      % Reference pressure
 %water info
